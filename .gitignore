@@ -1,2 +1,12 @@
 
 .spyproject/
+
+*.csv
+
+*.npz
+
+exp_data/obfuscated_keys.txt
+
+*.pkl
+
+*.npy
