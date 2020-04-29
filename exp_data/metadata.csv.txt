@@ -1,0 +1,1 @@
+ItemId,IDE,Freq,ItemName,Ierarhie1,Ierarhie2,IsActive
