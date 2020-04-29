@@ -126,7 +126,12 @@ if 'wemb' not in globals():
     wemb = data['arr_1']
 
 def show_word(word):
-    show_neighbors(word, wemb, np_words, log=log)
+    show_neighbors(
+        idx=word, 
+        embeds=wemb, 
+        dct_i2n=np_words, 
+        log=log,
+        )
     
 show_word('beatles')
 
@@ -272,8 +277,8 @@ prod_eng.get_similar_items(exp_id, filtered=False, show=print_df,
 new_embeds = prod_eng.get_retrofitted_embeds(
     prod_ids=exp_id, 
     dct_negative={exp_id:[neg_id]},
-    skip_negative=False,
-    method='v3_th', 
+    skip_negative=True,
+    method='v2_th', 
     batch_size=81, #256,
 #    DEBUG=True,
     dist='l1',

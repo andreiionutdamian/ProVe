@@ -14,7 +14,7 @@ from collections import OrderedDict
 import pickle
 
 
-import prove_utils
+from prove import prove_utils
           
 __EMBENG_VER__ = '0.1.0.1'
 
@@ -36,10 +36,10 @@ class EmbedsEngine():
              name_field,
              id_field,
              categ_fields,
+             dct_categ_names,
              log,
              strict_relations=True,
              save_folder=None,
-             dct_categ_names=None,
              name='emb_eng',
              ):
     """
@@ -89,10 +89,13 @@ class EmbedsEngine():
     self.log = log
     self.name = name
     self.is_categ_field_str = True
+    self.dct_categ_names = dct_categ_names
+    self.dct_categ_i2n = {}
     for categ_field in self.categ_fields:
       if type(self.df_meta[categ_field].iloc[0]) != str:
         self.is_categ_field_str = False
-    self.dct_categ_names = dct_categ_names
+      self.dct_categ_i2n[categ_field] = {v:k for k,v in self.dct_categ_names[categ_field].items()}
+    
     
     if save_folder is None and not hasattr(log, 'get_data_folder'):
       raise ValueError("Either Logger must provide `get_data_folder` or `save_folder` must be supplied")
@@ -113,7 +116,7 @@ class EmbedsEngine():
   
   def _maybe_load_graph(self):
     fn = os.path.join(self._save_folder, self.name + '.pkl')
-    data = None, None, None
+    data = None, None, None, None
     if os.path.isfile(fn):
       try:
         print("\rLoading item knowledge graph...", end='\r',flush=True)
@@ -123,17 +126,22 @@ class EmbedsEngine():
       except:
         pass
     
-    self.dct_edges, self.dct_categ_prods, self.dct_prods_categs = data
-    if self.dct_edges is not None and type(self.dct_edges[0]) != list:
-      self.P("Re-arange edges...")
-      self.dct_edges = {k:list(v) for k,v in self.dct_edges.items()}
-      self._save_graph()
-    return True if self.dct_edges is not None else False
+    self.dct_pos_edges, self.dct_neg_edges, self.dct_categ_prods, self.dct_prods_categs = data
+#    if self.dct_edges is not None and type(self.dct_edges[0]) != list:
+#      self.P("Re-arange edges...")
+#      self.dct_edges = {k:list(v) for k,v in self.dct_edges.items()}
+#      self._save_graph()
+    return True if self.dct_pos_edges is not None else False
       
 
   def _save_graph(self):
     fn = os.path.join(self._save_folder, self.name + '.pkl')
-    data = self.dct_pos_edges, self.dct_neg_edges
+    data = (
+        self.dct_pos_edges, 
+        self.dct_neg_edges, 
+        self.dct_categ_prods, 
+        self.dct_prods_categs,
+        )
     try:
       with open(fn, 'wb') as fh:
         pickle.dump(data, fh, protocol=pickle.HIGHEST_PROTOCOL)
@@ -145,6 +153,10 @@ class EmbedsEngine():
         
   
   def _setup_meta_data(self):
+    self.P("Preparing product dicts")
+    self.dct_i2n = {idx:name for idx, name in zip(self.df_meta[self.id_fld], self.df_meta[self.name_fld])}
+    self.dct_n2i = {v:k for k, v in self.dct_i2n.items()}
+    self.df_meta[self.name_fld] = self.df_meta[self.name_fld].str[:30]
     self.categs_names = []
     for categ_fld in self.categ_fields:
       name_field = categ_fld + '_name'      
@@ -171,29 +183,58 @@ class EmbedsEngine():
     return
 
 
-  def _get_item_negatives(self, item_id, k=100, max_dist=0.75):
+  def _get_item_negatives(self, item_id, k=100, max_dist=0.70):
+    self.log.start_timer('neg_get_neigh')
     idxs, dists = prove_utils.neighbors_by_idx(item_id, self.embeds, k=k)    
+    self.log.end_timer('neg_get_neigh')
     filtered = []
-    for i, idx in enumerate(idxs):
-      if dists[i] < max_dist:
-        filtered.append(idx)
+    filtered = idxs[dists < max_dist]
+    filtered1 = []
+    filtered2 = []
     if len(filtered) > 0:
-      df = self._items_to_df(filtered)
-      for categ_field in self.categ_fields:
-        df = df[df[categ_field] != self.dct_prods_categs[item_id][categ_field]]
-    if df.shape[0] > 0:
-      return df[self.id_fld].values
-    else:
-      return []
-    
+#      self.log.start_timer('neg_df1')
+#      self.log.start_timer('neg_items_to_df')
+#      df_orig = self._items_to_df(filtered)
+#      self.log.end_timer('neg_items_to_df')
+#      df1 = df_orig
+#      self.log.start_timer('neg_filter_by_categ')
+#      for categ_field in self.categ_fields:
+#        df1 = df1[df1[categ_field] != self.dct_prods_categs[item_id][categ_field]]
+#      self.log.end_timer('neg_filter_by_categ')
+#      self.log.end_timer('neg_df1')
+#      filtered1 = df1[self.id_fld].tolist()
       
+      self.log.start_timer('neg_categ_filter')
+      filtered1 = set(filtered)
+      for categ_field in self.categ_fields:
+        categ_id = self.dct_prods_categs[item_id][categ_field]
+        categ_items = self.dct_categ_prods[categ_field][categ_id]
+        filtered1 = filtered1 - set(categ_items)        
+      self.log.end_timer('neg_categ_filter')
+      
+      self.log.start_timer('neg_item_name')
+      item_name = self.dct_i2n[item_id]
+      item_name = item_name.replace(')' ,' ').replace('(',' ')
+      tokens = [x for x in item_name.split() if len(x) > 2]
+      filtered2 = []
+      for idx in filtered1:
+        _name = self.dct_i2n[idx]
+        ok = True
+        for token in tokens:
+          if _name.find(token) >= 0:
+            ok = False
+        if ok:
+          filtered2.append(idx)
+      self.log.end_timer('neg_item_name')
+      
+    res = filtered2
+    return res
   
-  def _construct_graph_from_meta(self, MAX_PROD_NEIGH=3000):
-    dct_pos_edges = {}    
-    dct_neg_edges = {}
+  def _meta_to_dicts(self):
     dct_categ_prods = {}
     dct_prods_categs = {x : {} for x in range(self.embeds.shape[0])}
-    self.P("Constructing items knowledge graph")    
+    self.P("Constructing items knowledge graph with `strict_relations={}`".format(
+        self.strict_relations))    
     for categ_field in self.categ_fields:
       self.P("  Retrieving products for category '{}'".format(categ_field))
       dct_categ_prods[categ_field] = {}
@@ -202,12 +243,22 @@ class EmbedsEngine():
             self.df_meta[categ_field] == categ_id][self.id_fld].unique().tolist()
         for prod_id in dct_categ_prods[categ_field][categ_id]:
           dct_prods_categs[prod_id][categ_field] = categ_id
+    self.dct_categ_prods = dct_categ_prods
+    self.dct_prods_categs = dct_prods_categs
+    return
     
+  
+  def _construct_graph_from_meta(self, MAX_PROD_NEIGH=3000):
+    dct_pos_edges = {}    
+    dct_neg_edges = {}
+    
+    self._meta_to_dicts()
+    no_neigh_list = []
     for emb_idx in range(self.embeds.shape[0]):
       prod_neighbors = []
-      for categ_field in dct_categ_prods:
-        prod_categ = dct_prods_categs[emb_idx][categ_field]
-        prods = dct_categ_prods[categ_field][prod_categ]
+      for categ_field in self.dct_categ_prods:
+        prod_categ = self.dct_prods_categs[emb_idx][categ_field]
+        prods = self.dct_categ_prods[categ_field][prod_categ]
         if self.strict_relations:
           if len(prod_neighbors) > 0:
             prod_neighbors = set(prod_neighbors) & set(prods)
@@ -215,34 +266,52 @@ class EmbedsEngine():
             prod_neighbors = prods
         else:
           prod_neighbors += prods
-        if len(prod_neighbors) > MAX_PROD_NEIGH:
-          raise ValueError('Looks like item {} has over {} products!'.format(
-              emb_idx, MAX_PROD_NEIGH))            
-      dct_pos_edges[emb_idx] = set(prod_neighbors)
+      if len(prod_neighbors) > MAX_PROD_NEIGH:
+        raise ValueError('Looks like item {} has over {} products!'.format(
+            emb_idx, MAX_PROD_NEIGH))                  
+      dct_pos_edges[emb_idx] = list(prod_neighbors)
+      no_neigh_list.append(len(dct_pos_edges[emb_idx]))
       if (emb_idx % 1000) == 0:
         self.log.Pr("  Creating positive relations graph {:.1f}%".format(
-            (emb_idx + 1) / self.embeds.shape[0] * 100), end='', flush=True)    
-    self.log.P("  Created positive relations graph.\t\t\t")
+            (emb_idx + 1) / self.embeds.shape[0] * 100))    
+    self.log.Pr("  Created positive relations graph.")
+    self.P("  Items nr of neigbors distribution:")
+    self.P(textwrap.indent(str(pd.Series(no_neigh_list).describe()), ' ' * 4))
 
 
+    no_neigh_list = []
+    self.log.Pr("  Creating negative relations graph...")
     for emb_idx in range(self.embeds.shape[0]):
+      self.log.start_timer("neg_iter")
+      self.log.start_timer("neg_get_negs")
       prod_neg_neigh = self._get_item_negatives(emb_idx)
+      self.log.end_timer("neg_get_negs")
       dct_neg_edges[emb_idx] = prod_neg_neigh
-      if (emb_idx % 1000) == 0:
+      no_neigh_list.append(len(dct_neg_edges[emb_idx]))
+      self.log.end_timer("neg_iter")
+      if ((emb_idx + 1) % 100) == 0:
         self.log.Pr("  Creating negative relations graph {:.1f}%".format(
-            (emb_idx + 1) / self.embeds.shape[0] * 100), end='', flush=True)    
-    self.log.P("  Created negative relations graph.\t\t\t")
+            (emb_idx + 1) / self.embeds.shape[0] * 100))    
+      
+    self.log.P("  Created negative relations graph.\t\t\t")    
+    self.P("  Items nr of negative neigbors distribution:")
+    self.P(textwrap.indent(str(pd.Series(no_neigh_list).describe()), ' ' * 4))
+    
 
-    self.dct_categ_prods = dct_categ_prods
-    self.dct_prods_categs = dct_prods_categs
     self.dct_pos_edges = {k:list(v) for k,v in dct_pos_edges.items()}
     self.dct_neg_edges = {k:list(v) for k,v in dct_neg_edges.items()}
     return
   
-  def _items_to_df(self, items):
-    fields = [self.id_fld, self.name_fld] + self.categs_names
-    df = self.df_meta[self.df_meta[self.id_fld].isin(items)][fields]
-    return df
+  def _items_to_df(self, items, dists=None):
+    if dists is not None:
+      fields = [self.id_fld, self.name_fld, 'DIST'] + self.categs_names + self.categ_fields
+      df = pd.DataFrame({self.id_fld: items, 'DIST':dists}, index=items)
+    else:
+      fields = [self.id_fld, self.name_fld] + self.categs_names + self.categ_fields
+      df = pd.DataFrame({self.id_fld: items}, index=items)
+   
+    df_out = df.join(self.df_meta, on=self.id_fld, rsuffix='r')[fields]
+    return df_out
         
       
   def get_item_info(self, item_id, verbose=False, show_relations=False):
@@ -251,9 +320,9 @@ class EmbedsEngine():
     dct_info['ID'] = item_id
     dct_info['NAME'] = self.df_meta[self.df_meta[self.id_fld] == item_id][[self.name_fld]].iloc[0,0]
     for i, categ_field in enumerate(self.categ_fields):
-      dct_info[categ_field] = self.dct_prod_categs[item_id][categ_field]
+      dct_info[categ_field] = self.dct_prods_categs[item_id][categ_field]
       if self.categs_names[i] != categ_field:
-        dct_info[self.categs_names[i]] = self.df_meta[self.df_meta[self.id_fld] == item_id][[self.categs_names[i]]].iloc[0,0]
+        dct_info[self.categs_names[i]] = self.dct_categ_i2n[categ_field][dct_info[categ_field]]
     dct_info['POS_EDGES'] = self.dct_pos_edges[item_id]
     dct_info['NEG_EDGES'] = self.dct_neg_edges[item_id]
     if verbose:
@@ -269,8 +338,9 @@ class EmbedsEngine():
             self.P("  {}: {}".format(k, val))
           else:
             # assume products
-            self.P("  {}:".format(k))
-            self.P(textwrap.indent(str(self._items_to_df(dct_info[k])),' ' * 4))
+            df = self._items_to_df(dct_info[k])
+            self.P("  {} ({} items):".format(k, df.shape[0]))
+            self.P(textwrap.indent(str(df.head()),' ' * 4))
             
     return dct_info
   
@@ -798,7 +868,7 @@ class EmbedsEngine():
       model.compile(optimizer=opt, loss=identity_loss)      
       tf.keras.utils.plot_model(
           model,
-          to_file=os.path.join(self._save_folder,'model.png'),
+          to_file=os.path.join(self._save_folder,'emb_retr_v2_tf.png'),
           show_shapes=True,
           show_layer_names=True,
           expand_nested=True,

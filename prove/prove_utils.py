@@ -30,6 +30,7 @@ class Log():
     self.log_fn = dt.now().strftime("logs/"+self._date+"_log.txt")
     self.timer_level = 0
     self.timers = {}
+    self.DEBUG = True
 
   def P(self, s=''):
     if type(s) != str:
@@ -134,18 +135,18 @@ class Log():
 
   def show_timers(self, summary='mean'):
     if self.DEBUG:
-      self.verbose_log("Timing results:")
+      self.P("Timing results:")
       for key,val in self.timers.items():
         if not ("___" in key):
           level_key = key + "___level"
           s_key = '  ' * self.timers[level_key] + key
           if summary in ['mean', 'avg']:
-            self.verbose_log(" {} = {:.3f}s".format(s_key,val))
+            self.P(" {} = {:.3f}s".format(s_key,val))
           else:
             total = val * self.timers[key+"___COUNT"]
-            self.verbose_log(" {} = {:.3f}s".format(s_key,total))            
+            self.P(" {} = {:.3f}s".format(s_key,total))            
     else:
-      self.verbose_log("DEBUG not activated!")
+      self.P("DEBUG not activated!")
     return      
       
         
@@ -198,16 +199,22 @@ def add_to_mco(df_chunk, dct_mco, basket_id_field, item_id_field, log):
   return dct_mco, counts
 
 
-def show_distrib(data, log, cutoff=np.inf, plot=False, return_data=False):
-  d = data.astype(int)
-  d[d>cutoff] = cutoff
-  _h = np.bincount(d).tolist()
+def show_distrib(data, log, cutoff=None, plot=False, return_data=False, display=None):
+  if type(data) != np.ndarray:
+    data = np.array(data)
+  _d = data.astype(int)
+  if cutoff is not None:
+    _d[_d>cutoff] = cutoff
+  _h = np.bincount(_d).tolist()
   _x = np.arange(len(_h))
-  s_counts = ["{:02d}".format(x) for x in _h][:10]
+  s_counts = ["{:02d}".format(x) for x in _h]
+  if display is None:
+    display = 10
+  s_counts = s_counts[:display]
   s_nitems = ["{:>"+str(len(x))+"}" for x in s_counts]# ["{:02d}".format(x) for x in range(max(all_counts)+1)]
   s_nitems = [x.format(i) for i,x in enumerate(s_nitems)]
-  log.P("    Counts:   " + ' '.join(s_counts))
-  log.P("    Nr items: " + ' '.join(s_nitems))
+  log.P("    Counts: " + ' '.join(s_counts))
+  log.P("    Values: " + ' '.join(s_nitems))
   if plot:
     plt.figure(figsize=(10,6))
     plt.bar(x=_x, height=_h, log=True)
@@ -405,8 +412,8 @@ def show_neighbors(idx, embeds, log, dct_i2n=None, dct_rev=None,
       log.P(("  {:<" + str(max_len) + "} {:.3f}").format(str(dct_i2n[ii]) + ':', dists[i]))
   else:
     names = [dct_i2n[ii] for ii in idxs]
-    h1s = [df[df[field]==ii][h1fld].iloc[0] for ii in idxs]
-    h2s = [df[df[field]==ii][h2fld].iloc[0] for ii in idxs]
+    h1s = [df[df[id_field]==ii][h1fld].iloc[0] for ii in idxs]
+    h2s = [df[df[id_field]==ii][h2fld].iloc[0] for ii in idxs]
     d = {
         'ID'    : idxs,
         'DIST'  : dists,
