@@ -13,7 +13,8 @@ import os
 from collections import OrderedDict
 import pickle
 
-from 
+from libraries_pub.generic_obj import LummetryObject
+
 from prove import prove_utils
           
 __EMBENG_VER__ = '0.1.0.1'
@@ -25,7 +26,7 @@ __EMBENG_VER__ = '0.1.0.1'
 ###############################################################################
 
 
-class EmbedsEngine():
+class EmbedsEngine(LummetryObject):
   """
   This is the main workhorse for the product replacement and new product creating 
   process.
@@ -38,8 +39,8 @@ class EmbedsEngine():
              categ_fields,
              dct_categ_names,
              strict_relations=True,
-             save_folder=None,
              name='emb_eng',
+             **kwargs,
              ):
     """
     Inputs:
@@ -58,9 +59,7 @@ class EmbedsEngine():
        `strict_relations` : (boolean, default True) flag that decides whether positive
                             relations are based on any category or only on category intersection
                             between products
-       
-       `save_folder`      : where to save the outputs - if `None` and `log` has `get_data_folder` will use it
-       
+             
        `dct_categ_names`  : dictionary that maps each each of `categ_fields` to ids and names
       
     """
@@ -85,7 +84,6 @@ class EmbedsEngine():
     self.name_fld = name_field
     self.id_fld = id_field
     self.categ_fields = categ_fields
-    self.log = log
     self.name = name
     self.is_categ_field_str = True
     self.dct_categ_names = dct_categ_names
@@ -94,61 +92,33 @@ class EmbedsEngine():
       if type(self.df_meta[categ_field].iloc[0]) != str:
         self.is_categ_field_str = False
       self.dct_categ_i2n[categ_field] = {v:k for k,v in self.dct_categ_names[categ_field].items()}
+    super().__init__(**kwargs)
+    return
     
-    
-    if save_folder is None and not hasattr(log, 'get_data_folder'):
-      raise ValueError("Either Logger must provide `get_data_folder` or `save_folder` must be supplied")
-    else:
-      if save_folder is not None:
-        self._save_folder = save_folder
-      else:
-        self._save_folder = log.get_data_folder()
-
-    if not hasattr(self, 'P'):
-      def _P(s):
-        self.log.P(s)
-      setattr(self, 'P', _P)
+  def startup(self):
+    super().startup()
 
     self.P("Initializing Embeddings processing Engine v{}.".format(self.version))
     self._setup_meta_data()
     return
   
   def _maybe_load_graph(self):
-    fn = os.path.join(self._save_folder, self.name + '.pkl')
-    data = None, None, None, None
-    if os.path.isfile(fn):
-      try:
-        print("\rLoading item knowledge graph...", end='\r',flush=True)
-        with open(fn, 'rb') as fh:
-          data = pickle.load(fh)
-        self.P("Item knowledge graph loaded.\t\t")
-      except:
-        pass
-    
-    self.dct_pos_edges, self.dct_neg_edges, self.dct_categ_prods, self.dct_prods_categs = data
-#    if self.dct_edges is not None and type(self.dct_edges[0]) != list:
-#      self.P("Re-arange edges...")
-#      self.dct_edges = {k:list(v) for k,v in self.dct_edges.items()}
-#      self._save_graph()
-    return True if self.dct_pos_edges is not None else False
+    data = self.log.load_pickle_from_models(self.name + '.pkl')
+    if data is not None:
+      self.dct_pos_edges, self.dct_neg_edges, self.dct_categ_prods, self.dct_prods_categs = data
+    return True if data is not None else False
       
 
   def _save_graph(self):
-    fn = os.path.join(self._save_folder, self.name + '.pkl')
+    fn = self.name + '.pkl'
     data = (
         self.dct_pos_edges, 
         self.dct_neg_edges, 
         self.dct_categ_prods, 
         self.dct_prods_categs,
         )
-    try:
-      with open(fn, 'wb') as fh:
-        pickle.dump(data, fh, protocol=pickle.HIGHEST_PROTOCOL)
-      self.P("Item knowledge graph save.")
-      return True
-    except:
-      self.P("Item knowledge graph save failed!")
-      return False
+    self.log.save_pickle_to_models(data, fn)
+    return False
         
   
   def _setup_meta_data(self):
@@ -868,7 +838,7 @@ class EmbedsEngine():
       model.compile(optimizer=opt, loss=identity_loss)      
       tf.keras.utils.plot_model(
           model,
-          to_file=os.path.join(self._save_folder,'emb_retr_v2_tf.png'),
+          to_file=os.path.join(self.log.get_models_folder(),'emb_retr_v2_tf.png'),
           show_shapes=True,
           show_layer_names=True,
           expand_nested=True,
@@ -1074,7 +1044,7 @@ class EmbedsEngine():
     model.compile(optimizer=opt, loss=identity_loss)      
     tf.keras.utils.plot_model(
         model,
-        to_file=os.path.join(self._save_folder,'emb_retr_v5_tf.png'),
+        to_file=os.path.join(self.log.get_models_folder(),'emb_retr_v5_tf.png'),
         show_shapes=True,
         show_layer_names=True,
         expand_nested=True,

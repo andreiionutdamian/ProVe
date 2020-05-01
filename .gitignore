@@ -12,3 +12,5 @@ exp_data/obfuscated_keys.txt
 *.npy
 
 prove/__pycache__/
+
+experiment/_data/obfuscated_keys.txt

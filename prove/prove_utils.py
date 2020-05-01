@@ -123,9 +123,9 @@ def generate_sparse_mco(file_name,
   max_date = None
   if DEBUG:    
     log.P("Loading MCO...")
-    csr_mco = sparse.load_npz(mco_file)
+    csr_mco = log.load_csr(mco_file, folder='models')
     log.P("Loading raw data...")
-    df = pd.read_csv(file_name)
+    df = log.load_dataframe(file_name)
     all_counts = df.groupby(basket_id_field)['IDE'].count()
   else:      
     data_size = os.path.getsize(file_name)
@@ -204,10 +204,8 @@ def generate_sparse_mco(file_name,
     return csr_mco
   
 
-def load_categs_from_json(df_meta, mapping_file):
-  import json
-  with open(mapping_file, 'rb') as fh:
-    dct_mapping = json.load(fh)
+def load_categs_from_json(df_meta, mapping_file, log):
+  dct_mapping = log.load_data_json(mapping_file)
   for field in dct_mapping:
     dct_rev = {v:k for k,v in dct_mapping[field].items()}
     hn = df_meta[field].apply(lambda x: dct_rev[x])

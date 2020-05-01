@@ -1,0 +1,27 @@
+[PROVE][2020-05-01 14:14:44] .\experiment\_logs\PROVE.txt log changed to .\experiment\_logs\20200501_141444_PROVE_001_log.txt...
+[PROVE][2020-05-01 14:14:44] Library [PROVE ] initialized on machine [DAMIAN_M15]
+[PROVE][2020-05-01 14:14:44]   Script running in ipython.
+[PROVE][2020-05-01 14:14:44] Metatada information:
+[PROVE][2020-05-01 14:14:44] Loading '.\experiment\_data\df_items_top_13.5k.csv'...
+[PROVE][2020-05-01 14:14:44]   Total no of products: 13000
+[PROVE][2020-05-01 14:14:44]   Total no of level 1 hierarchies: 24
+[PROVE][2020-05-01 14:14:44]   Total no of level 2 hierarchies: 181
+[PROVE][2020-05-01 14:14:44]   Most sold individual product over period:
+[PROVE][2020-05-01 14:14:44]    Name:  YUVAL NOAH HARARI / SAPIENS. SCURTA ISTORIE A OMENIRII
+[PROVE][2020-05-01 14:14:44]    Id:    545535
+[PROVE][2020-05-01 14:14:44]    Freq:  21248
+[PROVE][2020-05-01 14:14:44]    Hrchy: 1/17
+[PROVE][2020-05-01 14:14:44]   Least sold individual product over period:
+[PROVE][2020-05-01 14:14:44]    Name:  DAVID GROSSMAN / UN CAL INTRA ÎNTR-UN BAR
+[PROVE][2020-05-01 14:14:44]    Id:    442552
+[PROVE][2020-05-01 14:14:44]    Freq:  156
+[PROVE][2020-05-01 14:14:44]    Hrchy: 1/0
+[PROVE][2020-05-01 14:14:44] Loading json 'obfuscated_keys.txt' from 'data'
+[PROVE][2020-05-01 14:14:44] Loading MCO...
+[PROVE][2020-05-01 14:14:44] Loading csr sparse matrix 'mco_top_13.5k.npz' from 'models'
+[PROVE][2020-05-01 14:14:44] Loading raw data...
+[PROVE][2020-05-01 14:14:44] Loading '.\experiment\_data\df_tran_proc_top_13.5k.csv'...
+[PROVE][2020-05-01 14:14:49]   MCO Processing done in 0.08 min (sparse mat creation: 0.08 min):
+[PROVE][2020-05-01 14:14:49]   Start date: None
+[PROVE][2020-05-01 14:14:49]   End date:   None
+[PROVE][2020-05-01 14:14:49]   Max co-occ: 5998.0

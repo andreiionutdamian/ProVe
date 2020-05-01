@@ -14,26 +14,21 @@ import matplotlib.pyplot as plt
 print_df = True
 
 DEBUG = True # in-development flag
-MODEL_NAME = 'exp_v1'
-DATA_HOME = 'exp_data'
-MODEL_HOME = 'exp_models'
-DATA_FILE = os.path.join(DATA_HOME, 'df_tran_proc_top_13.5k.csv')
-DATA_SLICE_FILE = os.path.join(DATA_HOME, 'df_tran_proc_top_13.5k_slice.csv')
-META_FILE = os.path.join(DATA_HOME, 'df_items_top_13.5k.csv')
-META_INFO = os.path.join(DATA_HOME, 'obfuscated_keys.txt')
-MCO_OUT_FILE = os.path.join(MODEL_HOME, 'exp_mco.npz')
-EMB_OUT_FILE = os.path.join(MODEL_HOME, MODEL_NAME + '_embeds.npy')
+
+DATA_FILE = 'df_tran_proc_top_13.5k.csv'
+DATA_SLICE_FILE = 'df_tran_proc_top_13.5k_slice.csv'
+META_FILE = 'df_items_top_13.5k.csv'
+META_INFO = 'obfuscated_keys.txt'
+
+MCO_OUT_FILE = 'exp_mco.npz'
+EMB_OUT_FILE = '_embeds.npy'
 EMB128_5k_FN = 'exp_v3_i5k.npy'
 EMB128_10k_FN = 'exp_v2_i10k.npy'
 EMB128_250k_FN = 'exp_v1_embeds.npy' 
 EMB128_ES33_FN = 'exp_v4es_033.npy'
-EMB128_5k = os.path.join(MODEL_HOME, EMB128_5k_FN)
-EMB128_10k = os.path.join(MODEL_HOME, EMB128_10k_FN)
-EMB128_250k = os.path.join(MODEL_HOME, EMB128_250k_FN)
-EMB128_ES33 = os.path.join(MODEL_HOME, EMB128_ES33_FN)
 CHUNK_SIZE = 100 * 1024 ** 2 # read100MB chunks
 MAX_N_TOP_PRODUCTS = 13000  # top sold products
-_MCO_FILE  = os.path.join(MODEL_HOME, 'mco_top_13.5k.npz') # debug pre-prepared mco
+_MCO_FILE  = 'mco_top_13.5k.npz' # debug pre-prepared mco
 
 pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 500)
@@ -48,7 +43,8 @@ np.set_printoptions(linewidth=500)
 plt.style.use('ggplot')
 
 
-from prove.prove_utils import Log
+from libraries_pub.logger import Logger
+
 from prove.prove_utils import load_categs_from_json
 from prove.prove_utils import generate_sparse_mco
 from prove.prove_utils import show_neighbors
@@ -56,7 +52,7 @@ from prove.prove_utils import filter_categs
 from prove.prove_utils import show_categs
   
 
-log = Log()
+log = Logger("PROVE", config_file='config.txt')
 
 
 ## Understanding the data
@@ -70,7 +66,7 @@ def show_product(IDE, df):
     return
     
 log.P("Metatada information:")    
-df_meta = pd.read_csv(META_FILE)
+df_meta = log.load_dataframe(META_FILE)
 df_meta = df_meta[df_meta.IDE < MAX_N_TOP_PRODUCTS]
 log.P("  Total no of products: {}".format(df_meta.ItemId.unique().shape[0]))
 log.P("  Total no of level 1 hierarchies: {}".format(df_meta.Ierarhie1.unique().shape[0]))
@@ -81,10 +77,10 @@ log.P("  Least sold individual product over period:")
 show_product(df_meta[df_meta.Freq == df_meta.Freq.min()].iloc[0]['IDE'], df_meta)
 df_meta[df_meta.ItemName.str.len()<30].iloc[:15,:-1]
 
-df_meta, dct_categories = load_categs_from_json(df_meta, META_INFO)
+df_meta, dct_categories = load_categs_from_json(df_meta, META_INFO, log)
 df_meta[df_meta.ItemName.str.len()<30].iloc[:15,[3,7,8]]
 
-chunk_reader = pd.read_csv(DATA_SLICE_FILE, iterator=True) 
+chunk_reader = pd.read_csv(log.get_data_file(DATA_SLICE_FILE), iterator=True) 
 chunk_reader.get_chunk(15).iloc[:,:-2]
 
 
@@ -120,8 +116,8 @@ show_categs(df_meta, dct_categories, k=5, log=log)
 
 if 'wemb' not in globals():
     log.P("Loading GloVe word embeddings")
-    glove_words = os.path.join(DATA_HOME, 'glove_words_and_embeds_100d.npz')
-    data = np.load(glove_words)
+    glove_words_file = log.get_data_file('glove_words_and_embeds_100d.npz')
+    data = np.load(glove_words_file)
     np_words = data['arr_0']
     wemb = data['arr_1']
 
@@ -233,7 +229,7 @@ neg_items = [x[2] for x in test_items]
 #
 
 embeds_name = EMB128_ES33_FN #prove_model.name
-embeds = np.load(EMB128_ES33) # prove_model.embeds
+embeds = log.load_np(embeds_name, folder='models') # prove_model.embeds
 
 
 from prove.prove_engine import EmbedsEngine
@@ -245,7 +241,6 @@ prod_eng = EmbedsEngine(
     log=log,
     categ_fields=['Ierarhie1', 'Ierarhie2'],
     dct_categ_names=dct_categories,
-    save_folder=MODEL_HOME
     )
 
 ## Refining evaluation data using trained ProVe
