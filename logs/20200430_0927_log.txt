@@ -1,0 +1,160 @@
+Metatada information:
+  Total no of products: 13000
+  Total no of level 1 hierarchies: 24
+  Total no of level 2 hierarchies: 181
+  Most sold individual product over period:
+   Name:  YUVAL NOAH HARARI / SAPIENS. SCURTA ISTORIE A OMENIRII
+   Id:    545535
+   Freq:  21248
+   Hrchy: 1/17
+  Least sold individual product over period:
+   Name:  DAVID GROSSMAN / UN CAL INTRA ÎNTR-UN BAR
+   Id:    442552
+   Freq:  156
+   Hrchy: 1/0
+Loading MCO...
+Loading raw data...
+  MCO Processing done in 0.08 min (sparse mat creation: 0.08 min):
+  Start date: None
+  End date:   None
+  Max co-occ: 5998.0
+
+**Co-occurence distribution:**
+    Counts: 00 6382178 913964 293414 138452 77970 49730 34124 24904 18758
+    Values:  0       1      2      3      4     5     6     7     8     9
+
+**Transactions size distribution:**
+    Counts: 00 00 1210270 484388 194496 86254 41847 21134 11616 6430
+    Values:  0  1       2      3      4     5     6     7     8    9
+
+**Transactional data structure:**
+    RangeIndex: 5767223 entries, 0 to 5767222
+    Data columns (total 8 columns):
+     #   Column     Dtype  
+    ---  ------     -----  
+     0   BasketId   int64  
+     1   ItemId     int64  
+     2   SiteId     int64  
+     3   TimeStamp  object 
+     4   Qtty       float64
+     5   ClientId   int64  
+     6   IsActive   int64  
+     7   IDE        int64  
+    dtypes: float64(1), int64(6), object(1)
+    memory usage: 352.0+ MB
+
+
+MCO data: (only 7x7 values displayed)
+    [[   0.   25.   49. 5998.  297.   85.   28.]
+     [  25.    0.   32.   19.    6.    9.   15.]
+     [  49.   32.    0.   22.    8.   15.   28.]
+     [5998.   19.   22.    0.  165.   42.   13.]
+     [ 297.    6.    8.  165.    0.  141.   11.]
+     [  85.    9.   15.   42.  141.    0.   11.]
+     [  28.   15.   28.   13.   11.   11.    0.]]
+Saving 'exp_models\exp_mco.npz'
+*Hierarchy level 1 'Ierarhie1' contains 32 categories*
+  Category name: ACCESORII GASTRO AA  Id:   9  Prods:  523
+  Category name: ALTELE               Id:  26  Prods:    9
+  Category name: CARTE ROM            Id:   1  Prods: 7202
+  Category name: CARTE STRAINA        Id:   0  Prods:  736
+  ...
+*Hierarchy level 2 'Ierarhie2' contains 356 categories*
+  Category name: ACCESORII              Id: 116  Prods:    3
+  Category name: ACCESORII FASHION      Id: 274  Prods:   21
+  Category name: ACCESORII MASA         Id: 249  Prods:   26
+  Category name: ALTELE                 Id:  60  Prods:   60
+  ...
+Loading GloVe word embeddings
+Top neighbors for 9440: 'beatles':
+  beatles:    0.000
+  lennon:     0.246
+  mccartney:  0.276
+  dylan:      0.304
+  songs:      0.305
+  recordings: 0.325
+  albums:     0.326
+  elvis:      0.326
+  motown:     0.327
+  presley:    0.333
+*Hierarchy level 1 'Ierarhie1' contains 8 categories*
+  Category name: COMICS&MANGA  Id:  21  Prods:  135
+  Category name: GASTRONOMIE   Id:  20  Prods:  196
+  Category name: HOME&DECO AA  Id:  10  Prods:  174
+  Category name: LIFESTYLE     Id:  12  Prods:  239
+  Category name: MULTIMEDIA    Id:   8  Prods:  411
+  Category name: MUZICA        Id:   2  Prods:  219
+  Category name: NOVELTY       Id:  23  Prods:  103
+  Category name: VINURI        Id:  14  Prods:   23
+*Hierarchy level 2 'Ierarhie2' contains 14 categories*
+  Category name: Audiobook CD           Id: 111  Prods:    7
+  Category name: BLU-RAY                Id:  36  Prods:   16
+  Category name: BOARD GAMES            Id: 140  Prods:  165
+  Category name: Backtoschool           Id: 108  Prods:   16
+  Category name: Bakery                 Id: 269  Prods:   10
+  Category name: COMICS                 Id:  87  Prods:    3
+  Category name: Comics                 Id: 120  Prods:   23
+  Category name: FILOSOFIE              Id:  43  Prods:  144
+  Category name: Giftware               Id: 107  Prods:   95
+  Category name: LIFESTYLE              Id: 283  Prods:   11
+  Category name: MANGA                  Id:  63  Prods:   87
+  Category name: Travel Mug             Id: 144  Prods:   66
+  Category name: Travelling collection  Id:  75  Prods:   19
+  Category name: Vinyl                  Id:  10  Prods:   52
+Initializing Embeddings processing Engine v0.1.0.1.
+Preparing product dicts
+Found category string in 'Ierarhie1_name'
+Found category string in 'Ierarhie2_name'
+Item knowledge graph loaded.		
+
+Product '12071' info:
+  NAME: CD / DAVID BOWIE / BLACKSTAR (
+  Ierarhie1: 2
+  Ierarhie1_name: MUZICA
+  Ierarhie2: 4
+  Ierarhie2_name: CD International
+  POS_EDGES (102 items):
+             IDE                        ItemName Ierarhie1_name    Ierarhie2_name  Ierarhie1  Ierarhie2
+    1032    1032  CD / QUEEN / BOHEMIAN RHAPSODY         MUZICA  CD International          2          4
+    10780  10780  CD / TWENTY ONE PILOTS / TRENC         MUZICA  CD International          2          4
+    11834  11834   CD / NIRVANA / NIRVANA (2002)         MUZICA  CD International          2          4
+    11326  11326  CD / SELENA GOMEZ / REVIVAL (D         MUZICA  CD International          2          4
+    12862  12862  CD / DREAM THEATER / THE TRIPL         MUZICA  CD International          2          4
+  NEG_EDGES (6 items):
+             IDE                        ItemName       Ierarhie1_name                     Ierarhie2_name  Ierarhie1  Ierarhie2
+    8392    8392                13.2X2.5CM PLATE  ACCESORII GASTRO AA              Accesorii servit masa          9         16
+    12266  12266  TIM DEDOPULOS / HERCULE POIROT            CARTE ROM               PRACTIC / TIMP LIBER          1         30
+    4400    4400  CARTEA SARUTURILOR / IV CEL NA            CARTE ROM  POEZIE / TEATRU / STUDII LITERARE          1          2
+    9745    9745  MASINI DIE-CAST 7.5cm III ASST              JUCARII                            JUCARII          4         73
+    10135  10135  BUCATARIE ITALIANA 100 DE RETE            CARTE ROM                        GASTRONOMIE          1         78
+
+  Table: Non-filtered neighbors of 12071 using exp_v4es_033.npy model
+        ID  DIST                            NAME               H1                    H2
+  0  12071 0.000  CD / DAVID BOWIE / BLACKSTAR (           MUZICA      CD International
+  1  11418 0.644  CD / DAVID BOWIE / BEST OF BOW           MUZICA      CD International
+  2   4416 0.645  CD / COLDPLAY / 4 CD CATALOGUE           MUZICA      CD International
+  3   4865 0.663  CD / COLDPLAY / A HEAD FULL OF           MUZICA      CD International
+  4   9745 0.665  MASINI DIE-CAST 7.5cm III ASST          JUCARII               JUCARII
+  5   7933 0.675     CUVINTE INCRUCISATE/ IQ FUN        CARTE ROM    CARTI PENTRU COPII
+  6   8392 0.676                13.2X2.5CM PLATE  ACCESORII GASTR  Accesorii servit mas
+  7  10135 0.678  BUCATARIE ITALIANA 100 DE RETE        CARTE ROM           GASTRONOMIE
+  8   4400 0.682  CARTEA SARUTURILOR / IV CEL NA        CARTE ROM  POEZIE / TEATRU / ST
+  9  12266 0.697  TIM DEDOPULOS / HERCULE POIROT        CARTE ROM  PRACTIC / TIMP LIBER
+================================================================================================
+================================================================================================
+================================================================================================
+{'method': 'v4_th', 'batch_size': 256, 'dist': 'cos', 'fixed_weights': None}
+================================================================================================
+
+Performing retrofitting on (13000, 128) embedding matrix...
+  Product(s):  None
+  Full edges:  True
+  Method:      _get_retrofitted_embeds_v4_th
+  Pos edges: 13000
+  Neg edges: 13000
+Starting `_get_retrofitted_embeds_v4_th()` retrofit function
+  Preparing retrofit data based on dict(13000)...
+    Positive edges: 13000
+    Negative edges: 13000
+  Preparing torch model...
+  Training model for 99 epochs, batch=256, lr=5.0e-02, tol=1.0e-03, negative margin: 1, dist=cos, fixed_weights=None

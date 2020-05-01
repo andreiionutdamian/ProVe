@@ -1,0 +1,61 @@
+Metatada information:
+  Total no of products: 13000
+  Total no of level 1 hierarchies: 24
+  Total no of level 2 hierarchies: 181
+  Most sold individual product over period:
+   Name:  YUVAL NOAH HARARI / SAPIENS. SCURTA ISTORIE A OMENIRII
+   Id:    545535
+   Freq:  21248
+   Hrchy: 1/17
+  Least sold individual product over period:
+   Name:  DAVID GROSSMAN / UN CAL INTRA ÎNTR-UN BAR
+   Id:    442552
+   Freq:  156
+   Hrchy: 1/0
+*Hierarchy level 1 'Ierarhie1' contains 32 categories*
+  Category name: ACCESORII GASTRO AA  Id:   9  Prods:  523
+  Category name: ALTELE               Id:  26  Prods:    9
+  Category name: CARTE ROM            Id:   1  Prods: 7202
+  Category name: CARTE STRAINA        Id:   0  Prods:  736
+  ...
+*Hierarchy level 2 'Ierarhie2' contains 356 categories*
+  Category name: ACCESORII              Id: 116  Prods:    3
+  Category name: ACCESORII FASHION      Id: 274  Prods:   21
+  Category name: ACCESORII MASA         Id: 249  Prods:   26
+  Category name: ALTELE                 Id:  60  Prods:   60
+  ...
+Top neighbors for 9440: 'beatles':
+  beatles:    0.000
+  lennon:     0.246
+  mccartney:  0.276
+  dylan:      0.304
+  songs:      0.305
+  recordings: 0.325
+  albums:     0.326
+  elvis:      0.326
+  motown:     0.327
+  presley:    0.333
+*Hierarchy level 1 'Ierarhie1' contains 8 categories*
+  Category name: COMICS&MANGA  Id:  21  Prods:  135
+  Category name: GASTRONOMIE   Id:  20  Prods:  196
+  Category name: HOME&DECO AA  Id:  10  Prods:  174
+  Category name: LIFESTYLE     Id:  12  Prods:  239
+  Category name: MULTIMEDIA    Id:   8  Prods:  411
+  Category name: MUZICA        Id:   2  Prods:  219
+  Category name: NOVELTY       Id:  23  Prods:  103
+  Category name: VINURI        Id:  14  Prods:   23
+*Hierarchy level 2 'Ierarhie2' contains 14 categories*
+  Category name: Audiobook CD           Id: 111  Prods:    7
+  Category name: BLU-RAY                Id:  36  Prods:   16
+  Category name: BOARD GAMES            Id: 140  Prods:  165
+  Category name: Backtoschool           Id: 108  Prods:   16
+  Category name: Bakery                 Id: 269  Prods:   10
+  Category name: COMICS                 Id:  87  Prods:    3
+  Category name: Comics                 Id: 120  Prods:   23
+  Category name: FILOSOFIE              Id:  43  Prods:  144
+  Category name: Giftware               Id: 107  Prods:   95
+  Category name: LIFESTYLE              Id: 283  Prods:   11
+  Category name: MANGA                  Id:  63  Prods:   87
+  Category name: Travel Mug             Id: 144  Prods:   66
+  Category name: Travelling collection  Id:  75  Prods:   19
+  Category name: Vinyl                  Id:  10  Prods:   52

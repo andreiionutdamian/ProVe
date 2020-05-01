@@ -190,11 +190,11 @@ def mrr_k(np_cands_batch, np_gold_batch, k=5):
 
 ## Hyperparameters & hand-picked validation data
 
-EMBED_SIZE = 128
-MAX_FREQ = 250
-MAX_EPOCHS = 10000
-RETROFIT_TOL = 1e-5
-FULL_EDGES = True
+#EMBED_SIZE = 128
+#MAX_FREQ = 250
+#MAX_EPOCHS = 10000
+#RETROFIT_TOL = 1e-5
+#FULL_EDGES = True
 
 test_items = [
     (12071, 11418, 9745), 
@@ -258,45 +258,63 @@ exp_id, pos_id, neg_id = test_items[0]
 
 dct_prod_info = prod_eng.get_item_info(exp_id, verbose=True, show_relations=True)
 
-prod_eng.analize_item(exp_id, positive_id=pos_id, negative_id=neg_id, 
-                      embeds_name=embeds_name)
+
+
+
 prod_eng.get_similar_items(exp_id, filtered=False, show=print_df, 
                            name='Non-filtered neighbors of {} using {} model'.format(
                                exp_id, embeds_name))    
+#
+# batch size 256 looks best
+#
+#
+DEBUG = False
+if DEBUG:
+  batch_size = 32 
+  eager = True
+else:
+  batch_size = 256
+  eager = False
+options = [
+    {'method':'v4_th', 'batch_size': batch_size, 'dist':'l1'},
+    {'method':'v4_th', 'batch_size': batch_size, 'dist':'l2'},
+    {'method':'v4_th', 'batch_size': batch_size, 'dist':'cos', 'fixed_weights': None},
+    {'method':'v4_th', 'batch_size': batch_size, 'dist':'cos', 'fixed_weights': 1},
+
+    {'method':'v5_tf', 'batch_size': batch_size, 'dist':'l1'},
+    {'method':'v5_tf', 'batch_size': batch_size, 'dist':'l2'},
+    {'method':'v5_tf', 'batch_size': batch_size, 'dist':'cos', 'fixed_weights': None},
+    {'method':'v5_tf', 'batch_size': batch_size, 'dist':'cos', 'fixed_weights': 1},
+
+    ]
+
+for itr_no, setting in enumerate(options):
+  log.P("================================================================================================")
+  log.P("================================================================================================")
+  log.P("== Iteration {}: ================================================================================".format(
+      itr_no + 1))
+  log.P("================================================================================================")
+  log.P("{}".format(setting))
+  log.P("================================================================================================")
+  new_embeds = prod_eng.get_retrofitted_embeds(
+#      prod_ids=exp_id, 
+#      dct_negative={exp_id:[neg_id]},
+      skip_negative=False,
+      DEBUG=DEBUG,
+      eager=eager,
+      **setting,
+      )
   
-##################################  
+  n_dif = (np.abs(new_embeds - embeds).sum(axis=1) > 1e-3).sum()
+  log.P("Total {} embeddings modified".format(n_dif))
   
-#prod_eng.get_similar_items(exp_id, filtered=True, show=print_df,
-#                           name='Filtered neighbors of {} using {} model'.format(
-#                               exp_id, embeds_name))    
-                           
-      
-# The full Pipeline 
-
-
-new_embeds = prod_eng.get_retrofitted_embeds(
-    prod_ids=exp_id, 
-    dct_negative={exp_id:[neg_id]},
-    skip_negative=True,
-    method='v2_th', 
-    batch_size=81, #256,
-#    DEBUG=True,
-    dist='l1',
-    )
-
-n_dif = (np.abs(new_embeds - embeds).sum(axis=1) > 1e-3).sum()
-log.P("Total {} embeddings modified".format(n_dif))
-
-
-##################
-
-prod_eng.analize_item(exp_id, positive_id=pos_id, negative_id=neg_id, embeds=new_embeds,
-                      embeds_name=embeds_name+'_RETRO')   
-
-##################
-prod_eng.get_similar_items(exp_id, embeds=new_embeds, filtered=False, show=print_df,
-                           name='Non-filtered neighbors of {} using retrofitted {} model'.format(
-                               exp_id, embeds_name))    
+  prod_eng.analize_item(exp_id, positive_id=pos_id, negative_id=neg_id, 
+                        embeds_name=embeds_name)
+  prod_eng.analize_item(exp_id, positive_id=pos_id, negative_id=neg_id, embeds=new_embeds,
+                        embeds_name=embeds_name+'_RETRO')   
+  prod_eng.get_similar_items(exp_id, embeds=new_embeds, filtered=False, show=print_df,
+                             name='Non-filtered neighbors of {} using retrofitted {} model'.format(
+                                 exp_id, embeds_name))    
 
 ##############
 #df = prod_eng.get_similar_items(exp_id, embeds=new_embeds, filtered=True, show=print_df,

@@ -13,7 +13,7 @@ import os
 from collections import OrderedDict
 import pickle
 
-
+from 
 from prove import prove_utils
           
 __EMBENG_VER__ = '0.1.0.1'
@@ -37,7 +37,6 @@ class EmbedsEngine():
              id_field,
              categ_fields,
              dct_categ_names,
-             log,
              strict_relations=True,
              save_folder=None,
              name='emb_eng',
@@ -453,7 +452,7 @@ class EmbedsEngine():
         if full_edges:
           for related_id in related_prods:
             if related_id not in _dct:
-              _dct[related_id] = self.dct_edges[related_id]
+              _dct[related_id] = self.dct_pos_edges[related_id]
             elif prod_id not in _dct[related_id]:
               _dct[related_id].append(prod_id)
         if dct_negative is None and not skip_negative: 
@@ -463,7 +462,7 @@ class EmbedsEngine():
           if full_edges:
             for neg_id in negative_prods:
               if neg_id not in _dct_neg:
-                _dct_neg[neg_id] = prod_id
+                _dct_neg[neg_id] = [prod_id]
             
     if dct_negative is not None and not skip_negative:
       _dct_neg = dct_negative.copy()
@@ -481,6 +480,7 @@ class EmbedsEngine():
     self.P("  Method:      {}".format(func.__name__))
     self.P("  Pos edges: {}".format(len(_dct)))
     self.P("  Neg edges: {}".format(len(_dct_neg)))
+    self.P("Starting `{}()` retrofit function".format(func.__name__))
     t1 = time()
     embeds = func(dct_edges=_dct, dct_negative=_dct_neg, **kwargs)
     t2 = time()
@@ -646,7 +646,7 @@ class EmbedsEngine():
                              dct_negative=None, 
                              split=False, 
                              pad_id=-1,
-                             fix_weights=None):
+                             fixed_weights=None):
     self.P("  Preparing retrofit data based on dict({})...".format(len(dct_positive)))
     if len(dct_positive) <= 1:
       raise ValueError("`dct_positive` must have more than 1 item")
@@ -668,9 +668,9 @@ class EmbedsEngine():
       max_pos_len = max([1] + pos_lens)
       max_neg_len = max([1] + neg_lens)
       
-      if fix_weights is not None:
-        pos_w = [fix_weights for _ in pos_lists]
-        neg_w = [fix_weights for _ in neg_lists]
+      if fixed_weights is not None:
+        pos_w = [fixed_weights for _ in pos_lists]
+        neg_w = [fixed_weights for _ in neg_lists]
       else:
         pos_w = [1/len(x) if x!=[] else 0 for x in pos_lists]
         neg_w = [1/len(x) if x!=[] else 0 for x in neg_lists]   
@@ -920,34 +920,313 @@ class EmbedsEngine():
     
     return best_embeds
   
-  def _get_retrofitted_embeds_v2_th(self, 
+  
+  def _get_retrofitted_embeds_v5_tf(self, 
                                     dct_edges, 
                                     dct_negative=None,
                                     eager=False, 
                                     use_fit=False,
                                     epochs=99, 
-                                    batch_size=16384,
+                                    batch_size=256,
+                                    gpu_optim=True,
+                                    lr=0.05,
+                                    patience=2,
+                                    tol=1e-3,
+                                    dist='l1',
+                                    **kwargs):
+    """
+    this method implements a similar approach to Dingwell et al
+    """
+    import tensorflow as tf
+
+    
+    vocab_size = self.embeds.shape[0]
+    embedding_dim = self.embeds.shape[1]
+    
+    pad_id = vocab_size
+
+    data = self._prepare_retrofit_data(
+        dct_positive=dct_edges,
+        dct_negative=dct_negative,
+        pad_id=pad_id,
+        split=True,
+        )
+    
+    
+    if dct_negative is not None and len(dct_negative) > 0:
+      negative_margin = 128 
+      if dist == 'cos':
+        negative_margin = 1
+    else:
+      negative_margin = 0
+    
+    self.P("  Preparing model...")
+    
+    np_embeds = np.concatenate([self.embeds, np.zeros((1,embedding_dim))])
+    
+
+    embeds_old = tf.keras.layers.Embedding(
+        vocab_size + 1, embedding_dim, 
+        embeddings_initializer=tf.keras.initializers.Constant(np_embeds),
+        trainable=False,
+        dtype=tf.float32,
+        name='org_emb')
+    embeds_new = tf.keras.layers.Embedding(
+        vocab_size + 1, embedding_dim, 
+        embeddings_initializer=tf.keras.initializers.Constant(np_embeds),
+        trainable=True,
+        dtype=tf.float32,
+        name='new_emb')
+    
+    def cosine_distance(t1, t2):
+      t1 = tf.nn.l2_normalize(t1, axis=-1)
+      t2 = tf.nn.l2_normalize(t2, axis=-1)
+      return 1 - tf.reduce_sum(t1 * t2, axis=-1)      
+    
+    def identity_loss(y_true, y_pred):
+      return tf.math.maximum(0.0, tf.reduce_sum(y_pred))
+    
+    
+    lyr_p_l2 = tf.keras.layers.Lambda(lambda x: tf.reduce_sum(tf.pow(x[0]-x[1], 2), axis=-1), name='preserve_l2')
+    lyr_p_l1 = tf.keras.layers.Lambda(lambda x: tf.reduce_sum(tf.math.abs(x[0]-x[1]), axis=-1), name='preserve_l1')
+
+    lyr_r_l2 = tf.keras.layers.Lambda(lambda x: tf.reduce_sum(tf.pow(x[0]-x[1], 2), axis=-1), name='relate_l2')
+    lyr_r_l1 = tf.keras.layers.Lambda(lambda x: tf.reduce_sum(tf.math.abs(x[0]-x[1]), axis=-1), name='relate_l1')
+    lyr_r_cos = tf.keras.layers.Lambda(lambda x: cosine_distance(x[0], x[1]), name='relate_cos')
+
+    lyr_n_l2 = tf.keras.layers.Lambda(
+        lambda x: tf.reduce_sum(tf.pow(x[0]-x[1], 2), axis=-1),
+        name='negative_l2')
+    lyr_n_l1 = tf.keras.layers.Lambda(
+        lambda x: tf.reduce_sum(tf.math.abs(x[0]-x[1]), axis=-1), 
+        name='negative_l1')
+    lyr_n_cos = tf.keras.layers.Lambda(
+        lambda x: cosine_distance(x[0], x[1]), 
+        name='negative_cos')
+        
+        
+    lyr_n_margin = tf.keras.layers.Lambda(
+        lambda x: tf.maximum(negative_margin - x, 0),
+        name='negative_margin')
+    
+    if dist == 'l1':
+      lyr_p_dist = lyr_p_l1
+      lyr_r_dist = lyr_r_l1
+      lyr_n_dist = lyr_n_l1
+    elif dist == 'l2':
+      lyr_p_dist = lyr_p_l2
+      lyr_r_dist = lyr_r_l2
+      lyr_n_dist = lyr_n_l2
+    elif dist == 'cos':
+      lyr_p_dist = lyr_p_l1
+      lyr_r_dist = lyr_r_cos
+      lyr_n_dist = lyr_n_cos
+    
+    lyr_mask_r = tf.keras.layers.Lambda(lambda x: tf.cast(x != pad_id, dtype='float32'), name='relate_mask')
+    lyr_mask_n = tf.keras.layers.Lambda(lambda x: tf.cast(x != pad_id, dtype='float32'), name='negative_mask')
+    
+    lyr_r_masking = tf.keras.layers.Multiply(name='relate_masking')
+    lyr_n_masking = tf.keras.layers.Multiply(name='negative_masking')
+    
+    lyr_r_weighting = tf.keras.layers.Multiply(name='relation_weighting')
+    lyr_n_weighting = tf.keras.layers.Multiply(name='negative_weighting')
+    
+    lyr_r_reduce = tf.keras.layers.Lambda(lambda x: tf.reduce_sum(x, axis=-1, keepdims=True), name='relate_line_sum')
+    lyr_n_reduce = tf.keras.layers.Lambda(lambda x: tf.reduce_sum(x, axis=-1, keepdims=True), name='negative_line_sum')
+    
+    final_add = tf.keras.layers.Add(name='add_p_r_n')
+    
+    tf_src_id = tf.keras.layers.Input((1,), name='item_id')
+    tf_rel_id = tf.keras.layers.Input((None,), name='related_ids')
+    tf_rel_w = tf.keras.layers.Input((1,), name='related_weights')
+    tf_neg_id = tf.keras.layers.Input((None,), name='negative_ids')
+    tf_neg_w = tf.keras.layers.Input((1,), name='negative_weights')
+    
+    inputs = [tf_src_id, tf_rel_id, tf_rel_w, tf_neg_id, tf_neg_w]
+        
+    
+    tf_src_emb = embeds_old(tf_src_id)
+    tf_new_emb = embeds_new(tf_src_id)
+    tf_rel_emb = embeds_new(tf_rel_id)
+    tf_neg_emb = embeds_new(tf_neg_id)
+    
+    tf_p_dist = lyr_p_dist([tf_src_emb, tf_new_emb])
+    tf_r_dist = lyr_r_dist([tf_new_emb, tf_rel_emb])
+    tf_n_dist_pm = lyr_n_dist([tf_new_emb, tf_neg_emb])
+    tf_n_dist = lyr_n_margin(tf_n_dist_pm)
+    
+    tf_r_mask = lyr_mask_r(tf_rel_id)
+    tf_n_mask = lyr_mask_n(tf_neg_id)
+    
+    tf_r_masked = lyr_r_masking([tf_r_mask, tf_r_dist])
+    tf_n_masked = lyr_n_masking([tf_n_mask, tf_n_dist])
+    
+    tf_r_weighted = lyr_r_weighting([tf_r_masked, tf_rel_w])
+    tf_n_weighted = lyr_n_weighting([tf_n_masked, tf_neg_w])
+
+    tf_r_batch_loss = lyr_r_reduce(tf_r_weighted)
+    tf_n_batch_loss = lyr_n_reduce(tf_n_weighted)
+    
+    tf_retro_loss_batch = final_add([tf_p_dist, tf_r_batch_loss, tf_n_batch_loss])
+    
+    model = tf.keras.models.Model(inputs, tf_retro_loss_batch)
+    opt = tf.keras.optimizers.SGD(lr=lr)
+    model.compile(optimizer=opt, loss=identity_loss)      
+    tf.keras.utils.plot_model(
+        model,
+        to_file=os.path.join(self._save_folder,'emb_retr_v5_tf.png'),
+        show_shapes=True,
+        show_layer_names=True,
+        expand_nested=True,
+        )
+    if eager:
+      gpu_optim = False
+    losses = []
+    best_loss = np.inf
+    fails = 0
+    last_embeds = self.embeds
+    best_embeds = None
+    self.P("  Preparing dataset...")
+    data_np = [np.array(x) for x in data]
+    data_np_reshape = []
+    for np_data in data_np:
+      if len(np_data.shape) == 1:
+        data_np_reshape.append(np_data.reshape(-1,1))
+      else:
+        data_np_reshape.append(np_data)
+    tensors = tuple([tf.constant(x) for x in data_np_reshape])
+    ds = tf.data.Dataset.from_tensor_slices(tensors)
+    n_batches = data_np_reshape[0].shape[0] // batch_size + 1
+    ds = ds.batch(batch_size)
+    if gpu_optim:
+      ds = ds.apply(tf.data.experimental.copy_to_device("/gpu:0"))
+      ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
+    else:
+      ds = ds.prefetch(1)
+    self.P("  Training model for {} epochs, batch={}, lr={:.1e}, tol={:.1e}, dist={}, neg_margin={}".format(
+        epochs, batch_size, lr, tol, dist, negative_margin))
+    if eager:
+      for epoch in range(1, epochs+1):
+        epoch_losses = []
+        for i, batch in enumerate(ds):
+          tf_i, tf_r, tf_rw, tf_n, tf_nw = batch
+          with tf.GradientTape() as tape:
+            
+            tf_src_emb = embeds_old(tf_i)
+            tf_new_emb = embeds_new(tf_i)
+            tf_rel_emb = embeds_new(tf_r)
+            tf_neg_emb = embeds_new(tf_n)
+            
+            tf_p_dist    = lyr_p_dist([tf_src_emb, tf_new_emb])
+            tf_r_dist    = lyr_r_dist([tf_new_emb, tf_rel_emb])
+            tf_n_dist_pm = lyr_n_dist([tf_new_emb, tf_neg_emb])
+            tf_n_dist    = lyr_n_margin(tf_n_dist_pm)
+            
+            tf_r_mask = lyr_mask_r(tf_r)
+            tf_n_mask = lyr_mask_n(tf_n)
+            
+            tf_r_masked = lyr_r_masking([tf_r_mask, tf_r_dist])
+            tf_n_masked = lyr_n_masking([tf_n_mask, tf_n_dist])
+            
+            tf_r_weighted = lyr_r_weighting([tf_r_masked, tf_rw])
+            tf_n_weighted = lyr_n_weighting([tf_n_masked, tf_nw])
+        
+            tf_r_batch_loss = lyr_r_reduce(tf_r_weighted)
+            tf_n_batch_loss = lyr_n_reduce(tf_n_weighted)
+            
+            tf_retro_loss_batch = final_add([tf_p_dist, tf_r_batch_loss, tf_n_batch_loss])      
+            
+            tf_loss = identity_loss(None, tf_retro_loss_batch)
+            
+          epoch_losses.append(round(tf_loss.numpy(),2))
+          grads = tape.gradient(tf_loss, model.trainable_weights)
+#          test = _convert(grads[0])
+          opt.apply_gradients(zip(grads, model.trainable_weights))
+          self.log.Pr("    Epoch {:03d} - {:.1f}% - loss: {:.2f}".format(
+              epoch, i / n_batches * 100, np.mean(epoch_losses)))
+        # end batch
+        epoch_loss = np.mean(epoch_losses)
+        losses.append(epoch_loss)          
+      # end epoch
+    # end if eager
+    else:     
+      @tf.function
+      def _train_on_batch(batch):
+        with tf.GradientTape() as tape:
+          tf_out = model(batch)
+          tf_loss = identity_loss(None, tf_out)
+        grads = tape.gradient(tf_loss, model.trainable_weights)
+        opt.apply_gradients(zip(grads, model.trainable_weights))
+        return tf_loss
+
+      for epoch in range(1, epochs+1):
+        epoch_losses = []
+        t1 = time()
+        b_shape = None          
+        for i, batch in enumerate(ds):
+          if i == 0:
+            b_shape = batch[0].shape[0]
+#          loss = model.train_on_batch(x=batch, y=batch[0])
+          loss = _train_on_batch(batch)
+          epoch_losses.append(round(loss.numpy(),2))
+          self.log.Pr("    Epoch {:02d} - {:.1f}% - loss: {:.2f}".format(
+              epoch, i / n_batches * 100, np.mean(epoch_losses)))
+        t2 = time()
+        epoch_loss = np.mean(epoch_losses)
+        losses.append(epoch_loss)
+        new_embeds = embeds_new.get_weights()[0][:-1]
+        if epoch_loss < best_loss:
+          best_embeds = new_embeds
+          best_loss = epoch_loss
+          fails = 0
+        else:
+          fails += 1
+        diff = self._measure_changes(last_embeds, new_embeds)
+        self.P("    Epoch {:02d}/{} - loss: {:.2f}, change:{:.3f}, time: {:.1f}s, batch: {}, fails: {}".format(
+            epoch, epochs, epoch_loss, diff, t2 - t1, b_shape, fails))
+        if fails >= patience or diff <= tol:
+          self.P("    Stopping traing at epoch {}".format(epoch))
+          break
+        last_embeds = new_embeds
+    
+    return best_embeds
+  
+    
+    
+  
+  
+  def _get_retrofitted_embeds_v4_th(self, 
+                                    dct_edges, 
+                                    dct_negative=None,
+                                    eager=False, 
+                                    use_fit=False,
+                                    epochs=99, 
+                                    batch_size=256,
                                     gpu_optim=True,
                                     lr=0.05,
                                     tol=1e-3,
                                     patience=2,
                                     DEBUG=False,
                                     dist='l2',
+                                    fixed_weights=None,  
+                                    verbose=True,
                                     **kwargs):
     """
     this method implements a similar approach to Dingwell et al
     """
-    self.P("Starting `_get_retrofitted_embeds_v2_th`...")
     import torch as th
 
     vocab_size = self.embeds.shape[0]
     embedding_dim = self.embeds.shape[1]
 
+    pad_id = vocab_size
+    
     data = self._prepare_retrofit_data(
         dct_positive=dct_edges,
         dct_negative=dct_negative,
         split=True,
-        pad_id = vocab_size
+        pad_id=pad_id,
+        fixed_weights=fixed_weights,
         )
         
     self.P("  Preparing torch model...")
@@ -961,12 +1240,6 @@ class EmbedsEngine():
     th_embeds = th.tensor(self.embeds, dtype=th.float32, requires_grad=False, device=device)
     th_embeds_pad = th.cat((th_embeds, th.zeros((1,embedding_dim), device=device)))
     
-    if DEBUG:
-      if dct_negative is not None and len(dct_negative) > 0:
-        for i, v in enumerate(data[3]):
-          if v[0] != vocab_size:
-            break
-        batch_size = i + 1
     
     ds = th.utils.data.TensorDataset(*tensors)
     dl = th.utils.data.DataLoader(
@@ -987,20 +1260,27 @@ class EmbedsEngine():
     best_loss = np.inf
     fails = 0
     last_embeds = self.embeds
+
     if dct_negative is not None and len(dct_negative) > 0:
       negative_margin = 128 
+      if dist == 'cos':
+        negative_margin = 1
     else:
       negative_margin = 0
-    self.P("  Training model for {} epochs, batch={}, lr={:.1e}, tol={:.1e}{}, dist={}".format(
+    self.P("  Training model for {} epochs, batch={}, lr={:.1e}, tol={:.1e}{}, dist={}, fixed_weights={}".format(
         epochs, batch_size, lr, tol, 
         ", negative margin: {}".format(negative_margin) if negative_margin>0 else "",
-        dist))
+        dist, fixed_weights))
     for epoch in range(1, epochs + 1):
       epoch_losses = []
+      p_losses = []
+      r_losses = []
+      n_losses = []
       t1 = time()
       for i, batch in enumerate(dl):
         th_ids, th_pos, th_pos_w, th_neg, th_neg_w = batch
-        b_shape = th_pos.shape
+        if i == 0:
+          b_shape = th_pos.shape
         th_pos_w = th_pos_w.unsqueeze(-1)
         th_neg_w = th_neg_w.unsqueeze(-1)
         
@@ -1012,48 +1292,70 @@ class EmbedsEngine():
         th_org_embs = th_org_embs_raw
         th_new_embs = th_new_embs_raw
         th_pos_embs = th_pos_embs_raw
-        th_neg_embs = th_neg_embs_raw
-        
-        
-#        th_org_embs = th.nn.functional.normalize(th_org_embs, p=2, dim=-1)
-#        th_new_embs = th.nn.functional.normalize(th_new_embs, p=2, dim=-1)
-#        th_pos_embs = th.nn.functional.normalize(th_pos_embs, p=2, dim=-1)
-#        th_neg_embs = th.nn.functional.normalize(th_neg_embs, p=2, dim=-1)
+        th_neg_embs = th_neg_embs_raw        
+
         if dist == 'l2':
           th_preserve_loss = (th_org_embs - th_new_embs).pow(2).sum(-1)
-        else:
+        elif dist == 'l1':
           th_preserve_loss = (th_org_embs - th_new_embs).abs().sum(-1)
+        elif dist == 'cos':
+          ### maybe huber?
+          th_preserve_loss = (th_org_embs - th_new_embs).pow(2).sum(-1)                    
         
         if dist == 'l2':
           th_relate_nm = (th_pos_embs - th_new_embs).pow(2).sum(-1)
-        else:
+        elif dist == 'l1':
           th_relate_nm = (th_pos_embs - th_new_embs).abs().sum(-1)
-        th_relate_mask = ((th_pos_embs == 0).sum(-1) < 128).float()
+        elif dist == 'cos':
+          th_relate_nm = 1 - th.nn.functional.cosine_similarity(
+              th_new_embs, th_pos_embs, dim=-1) 
+          
+        th_relate_mask = (th_pos != pad_id).float()
         th_relate_masked = th_relate_nm * th_relate_mask        
-        th_relate_w = th_relate_masked * th_pos_w
-        th_relate_loss = th_relate_w.sum(-1, keepdims=True)
+        th_relate_weighted = th_relate_masked * th_pos_w
+        th_relate_loss = th_relate_weighted.sum(-1, keepdims=True)
         
         if dist == 'l2':
           th_neg_nm = (th_new_embs - th_neg_embs).pow(2).sum(-1)
-        else:
-          th_neg_nm = (th_new_embs - th_neg_embs).abs().sum(-1)          
+        elif dist == 'l1':
+          th_neg_nm = (th_new_embs - th_neg_embs).abs().sum(-1)  
+        elif dist == 'cos':
+          th_neg_nm = 1 - th.nn.functional.cosine_similarity(
+              th_new_embs, th_neg_embs, dim=-1)
+          negative_margin = 1
+                
         th_neg_nm_d = th.clamp(negative_margin - th_neg_nm, min=0)
-        th_neg_mask = (th_neg_embs.sum(-1) > 0).float()
+        th_neg_mask = (th_neg != pad_id).float()
         th_neg_masked = th_neg_mask * th_neg_nm_d        
         th_neg = th_neg_masked * th_neg_w
         th_neg_loss = th_neg.sum(-1, keepdims=True)
         
-        th_loss = th_preserve_loss.sum() + th_relate_loss.sum() + th_neg_loss.sum()
+#        th_temp = th_preserve_loss + th_relate_loss +  th_neg_loss
+        
+        th_p_loss = th_preserve_loss.sum()
+        th_r_loss = th_relate_loss.sum()
+        th_n_loss = th_neg_loss.sum()
+        
+        th_loss = th_p_loss + th_r_loss + th_n_loss
         
         opt.zero_grad()
         th_loss.backward()
         opt.step()
-        epoch_losses.append(th_loss.detach().cpu().numpy())
-        self.log.Pr("    Epoch {:02d} - {:.1f}% - loss: {:.2f}".format(
-            epoch, i / n_batches * 100, np.mean(epoch_losses)))
+        epoch_losses.append(round(th_loss.detach().cpu().item(),2))
+        epoch_loss = np.mean(epoch_losses)
+        if verbose:
+          p_losses.append(round(th_p_loss.detach().cpu().item(),2))
+          r_losses.append(round(th_r_loss.detach().cpu().item(),2))
+          n_losses.append(round(th_n_loss.detach().cpu().item(),2))
+          p_loss = np.mean(p_losses)
+          r_loss = np.mean(r_losses)
+          n_loss = np.mean(n_losses)
+          self.log.Pr("    Epoch {:02d} - {:.1f}% - loss: {:.2f} (P/R/N: {:.2f}/{:.2f}/{:.2f})".format(
+              epoch, i / n_batches * 100, 
+              epoch_loss,
+              p_loss, r_loss, n_loss))
       # end batch
       t2 = time()
-      epoch_loss = np.mean(epoch_losses)
       losses.append(epoch_loss)
       new_embeds = emb_new.weight.data.detach().cpu().numpy()[:-1]         
       if epoch_loss < best_loss:
@@ -1063,148 +1365,22 @@ class EmbedsEngine():
       else:
         fails += 1
       diff = self._measure_changes(last_embeds, new_embeds)
-      self.P("    Epoch {:02d}/{} - loss: {:.2f}, change:{:.3f}, time: {:.1f}s,  batch: {}, fails: {}".format(
-          epoch, epochs, epoch_loss, diff, t2 - t1, b_shape, fails))
+      if verbose:
+        self.P("    Epoch {:02d}/{} - loss: {:.2f} (P/R/N: {:.2f}/{:.2f}/{:.2f}), change:{:.3f}, time: {:.1f}s, batch: {}, fails: {}".format(
+            epoch, epochs, 
+            epoch_loss, p_loss, r_loss, n_loss,
+            diff, t2 - t1, b_shape[0], fails))
+      else:
+        print(".", end='', flush=True)
       if fails >= patience or diff <= tol:
         self.P("    Stopping traing at epoch {}".format(epoch))
         break
       last_embeds = new_embeds
     # end epoch
-    return best_embeds
-        
-    
-
-  def _get_retrofitted_embeds_v3_th(self, 
-                                    dct_edges, 
-                                    dct_negative=None,
-                                    eager=False, 
-                                    use_fit=False,
-                                    epochs=99, 
-                                    batch_size=16384,
-                                    gpu_optim=True,
-                                    lr=0.05,
-                                    tol=1e-4,
-                                    patience=2,
-                                    DEBUG=False,
-                                    **kwargs):
-    """
-    this method implements a similar approach to Dingwell et al
-    """
-    self.P("Starting `_get_retrofitted_embeds_v3_th`...")
-    import torch as th
-
-    vocab_size = self.embeds.shape[0]
-    embedding_dim = self.embeds.shape[1]
-
-    data = self._prepare_retrofit_data(
-        dct_positive=dct_edges,
-        dct_negative=dct_negative,
-        split=True,
-        pad_id = vocab_size,
-#        fix_weights=1,
-        )
-    
-    if DEBUG:
-      batch_size = 8
-      if dct_negative is not None and len(dct_negative) > 0:
-        for i, v in enumerate(data[3]):
-          if v[0] != vocab_size:
-            break
-        batch_size = i + 1
-    
-        
-    self.P("  Preparing torch model...")
-    
-    device = th.device("cuda" if th.cuda.is_available() else "cpu")
     if th.cuda.is_available():
-      th.cuda.empty_cache()
-    
-    tensors = [th.tensor(x, requires_grad=False, device=device) for x in data]
-
-    th_embeds = th.tensor(self.embeds, dtype=th.float32, requires_grad=False, device=device)
-    th_embeds_pad = th.cat((th_embeds, th.zeros((1,embedding_dim), device=device)))
-    
-    ds = th.utils.data.TensorDataset(*tensors)
-    dl = th.utils.data.DataLoader(
-        dataset=ds,
-        batch_size=batch_size, 
-        shuffle=not DEBUG,
-        )
-    
-    emb_new = th.nn.Embedding(
-        vocab_size + 1, 
-        embedding_dim, 
-        padding_idx=vocab_size).to(device)
-    
-    emb_new.weight.data.copy_(th_embeds_pad)
-    opt = th.optim.SGD(params=emb_new.parameters(), lr=lr) 
-    n_batches = len(data[0]) // batch_size + 1
-    losses = []
-    best_loss = np.inf
-    fails = 0
-    last_embeds = self.embeds
-    self.P("  Training model for {} epochs, batch={}, lr={:.1e}, tol={:.1e}".format(
-        epochs, batch_size, lr, tol))
-    for epoch in range(1, epochs + 1):
-      epoch_losses = []
-      t1 = time()
-      for i, batch in enumerate(dl):
-        th_ids, th_pos, th_pos_w, th_neg, th_neg_w = batch
-        b_shape = th_pos.shape
-        th_pos_w = th_pos_w.unsqueeze(-1)
-        th_neg_w = th_neg_w.unsqueeze(-1)
-        
-        th_org_embs = th_embeds[th_ids].unsqueeze(1)
-        th_new_embs = emb_new(th_ids).unsqueeze(1)
-        th_pos_embs = emb_new(th_pos)
-        th_neg_embs = emb_new(th_neg)
-        
-        
-        th_preserve_loss = (th_org_embs - th_new_embs).pow(2).sum(-1)
-        
-        
-        th_relate_nm = 1 - th.nn.functional.cosine_similarity(th_new_embs, th_pos_embs, dim=-1) 
-        th_relate_mask = ((th_pos_embs == 0).sum(-1) < 128).float()
-        th_relate_masked = th_relate_nm * th_relate_mask        
-        th_relate_w = th_relate_masked * th_pos_w
-        th_relate_loss = th_relate_w.sum(-1, keepdims=True)
-        
-        th_neg_nm = th.nn.functional.cosine_similarity(th_new_embs, th_neg_embs, dim=-1)#(th_new_embs - th_neg_embs).abs().sum(-1)
-        th_neg_v = th.clamp(th_neg_nm, min=0)
-        th_neg_mask = (th_neg_embs.sum(-1) > 0).float()
-        th_neg_masked = th_neg_mask * th_neg_v        
-        th_neg_weighted = th_neg_masked * th_neg_w
-        th_neg_loss = th_neg_weighted.sum(-1, keepdims=True)
-        
-        th_loss = th_preserve_loss.sum() + th_relate_loss.sum() + th_neg_loss.sum()
-        
-        opt.zero_grad()
-        th_loss.backward()
-        opt.step()
-        epoch_losses.append(th_loss.detach().cpu().numpy())
-        self.log.Pr("    Epoch {:02d} - {:.1f}% - loss: {:.2f}".format(
-            epoch, i / n_batches * 100, np.mean(epoch_losses)))
-      # end batch
-      t2 = time()
-      epoch_loss = np.mean(epoch_losses)
-      losses.append(epoch_loss)
-      new_embeds = emb_new.weight.data.detach().cpu().numpy()[:-1]         
-      if epoch_loss < best_loss:
-        best_loss = epoch_loss
-        best_embeds = new_embeds
-        fails = 0
-      else:
-        fails += 1
-      diff = self._measure_changes(last_embeds, new_embeds)
-      self.P("    Epoch {:02d}/{} - loss: {:.2f}, change:{:.3f}, time: {:.1f}s,  batch: {}, fails: {}".format(
-          epoch, epochs, epoch_loss, diff, t2 - t1, b_shape, fails))
-      if fails >= patience or diff <= tol:
-        self.P("    Stopping traing at epoch {}".format(epoch))
-        break
-      last_embeds = new_embeds
-    # end epoch
+      th.cuda.empty_cache()    
     return best_embeds
-    
+        
     
   
   

@@ -1,0 +1,830 @@
+Metatada information:
+  Total no of products: 13000
+  Total no of level 1 hierarchies: 24
+  Total no of level 2 hierarchies: 181
+  Most sold individual product over period:
+   Name:  YUVAL NOAH HARARI / SAPIENS. SCURTA ISTORIE A OMENIRII
+   Id:    545535
+   Freq:  21248
+   Hrchy: 1/17
+  Least sold individual product over period:
+   Name:  DAVID GROSSMAN / UN CAL INTRA ÎNTR-UN BAR
+   Id:    442552
+   Freq:  156
+   Hrchy: 1/0
+Loading MCO...
+Loading raw data...
+  MCO Processing done in 0.08 min (sparse mat creation: 0.08 min):
+  Start date: None
+  End date:   None
+  Max co-occ: 5998.0
+
+**Co-occurence distribution:**
+    Counts: 00 6382178 913964 293414 138452 77970 49730 34124 24904 18758
+    Values:  0       1      2      3      4     5     6     7     8     9
+
+**Transactions size distribution:**
+    Counts: 00 00 1210270 484388 194496 86254 41847 21134 11616 6430
+    Values:  0  1       2      3      4     5     6     7     8    9
+
+**Transactional data structure:**
+    RangeIndex: 5767223 entries, 0 to 5767222
+    Data columns (total 8 columns):
+     #   Column     Dtype  
+    ---  ------     -----  
+     0   BasketId   int64  
+     1   ItemId     int64  
+     2   SiteId     int64  
+     3   TimeStamp  object 
+     4   Qtty       float64
+     5   ClientId   int64  
+     6   IsActive   int64  
+     7   IDE        int64  
+    dtypes: float64(1), int64(6), object(1)
+    memory usage: 352.0+ MB
+
+
+MCO data: (only 7x7 values displayed)
+    [[   0.   25.   49. 5998.  297.   85.   28.]
+     [  25.    0.   32.   19.    6.    9.   15.]
+     [  49.   32.    0.   22.    8.   15.   28.]
+     [5998.   19.   22.    0.  165.   42.   13.]
+     [ 297.    6.    8.  165.    0.  141.   11.]
+     [  85.    9.   15.   42.  141.    0.   11.]
+     [  28.   15.   28.   13.   11.   11.    0.]]
+Saving 'exp_models\exp_mco.npz'
+*Hierarchy level 1 'Ierarhie1' contains 32 categories*
+  Category name: ACCESORII GASTRO AA  Id:   9  Prods:  523
+  Category name: ALTELE               Id:  26  Prods:    9
+  Category name: CARTE ROM            Id:   1  Prods: 7202
+  Category name: CARTE STRAINA        Id:   0  Prods:  736
+  ...
+*Hierarchy level 2 'Ierarhie2' contains 356 categories*
+  Category name: ACCESORII              Id: 116  Prods:    3
+  Category name: ACCESORII FASHION      Id: 274  Prods:   21
+  Category name: ACCESORII MASA         Id: 249  Prods:   26
+  Category name: ALTELE                 Id:  60  Prods:   60
+  ...
+Loading GloVe word embeddings
+Top neighbors for 9440: 'beatles':
+  beatles:    0.000
+  lennon:     0.246
+  mccartney:  0.276
+  dylan:      0.304
+  songs:      0.305
+  recordings: 0.325
+  albums:     0.326
+  elvis:      0.326
+  motown:     0.327
+  presley:    0.333
+*Hierarchy level 1 'Ierarhie1' contains 8 categories*
+  Category name: COMICS&MANGA  Id:  21  Prods:  135
+  Category name: GASTRONOMIE   Id:  20  Prods:  196
+  Category name: HOME&DECO AA  Id:  10  Prods:  174
+  Category name: LIFESTYLE     Id:  12  Prods:  239
+  Category name: MULTIMEDIA    Id:   8  Prods:  411
+  Category name: MUZICA        Id:   2  Prods:  219
+  Category name: NOVELTY       Id:  23  Prods:  103
+  Category name: VINURI        Id:  14  Prods:   23
+*Hierarchy level 2 'Ierarhie2' contains 14 categories*
+  Category name: Audiobook CD           Id: 111  Prods:    7
+  Category name: BLU-RAY                Id:  36  Prods:   16
+  Category name: BOARD GAMES            Id: 140  Prods:  165
+  Category name: Backtoschool           Id: 108  Prods:   16
+  Category name: Bakery                 Id: 269  Prods:   10
+  Category name: COMICS                 Id:  87  Prods:    3
+  Category name: Comics                 Id: 120  Prods:   23
+  Category name: FILOSOFIE              Id:  43  Prods:  144
+  Category name: Giftware               Id: 107  Prods:   95
+  Category name: LIFESTYLE              Id: 283  Prods:   11
+  Category name: MANGA                  Id:  63  Prods:   87
+  Category name: Travel Mug             Id: 144  Prods:   66
+  Category name: Travelling collection  Id:  75  Prods:   19
+  Category name: Vinyl                  Id:  10  Prods:   52
+Initializing Embeddings processing Engine v0.1.0.1.
+Preparing product dicts
+Found category string in 'Ierarhie1_name'
+Found category string in 'Ierarhie2_name'
+Item knowledge graph loaded.		
+
+Product '12071' info:
+  NAME: CD / DAVID BOWIE / BLACKSTAR (
+  Ierarhie1: 2
+  Ierarhie1_name: MUZICA
+  Ierarhie2: 4
+  Ierarhie2_name: CD International
+  POS_EDGES (102 items):
+             IDE                        ItemName Ierarhie1_name    Ierarhie2_name  Ierarhie1  Ierarhie2
+    1032    1032  CD / QUEEN / BOHEMIAN RHAPSODY         MUZICA  CD International          2          4
+    10780  10780  CD / TWENTY ONE PILOTS / TRENC         MUZICA  CD International          2          4
+    11834  11834   CD / NIRVANA / NIRVANA (2002)         MUZICA  CD International          2          4
+    11326  11326  CD / SELENA GOMEZ / REVIVAL (D         MUZICA  CD International          2          4
+    12862  12862  CD / DREAM THEATER / THE TRIPL         MUZICA  CD International          2          4
+  NEG_EDGES (6 items):
+             IDE                        ItemName       Ierarhie1_name                     Ierarhie2_name  Ierarhie1  Ierarhie2
+    8392    8392                13.2X2.5CM PLATE  ACCESORII GASTRO AA              Accesorii servit masa          9         16
+    12266  12266  TIM DEDOPULOS / HERCULE POIROT            CARTE ROM               PRACTIC / TIMP LIBER          1         30
+    4400    4400  CARTEA SARUTURILOR / IV CEL NA            CARTE ROM  POEZIE / TEATRU / STUDII LITERARE          1          2
+    9745    9745  MASINI DIE-CAST 7.5cm III ASST              JUCARII                            JUCARII          4         73
+    10135  10135  BUCATARIE ITALIANA 100 DE RETE            CARTE ROM                        GASTRONOMIE          1         78
+
+  Table: Non-filtered neighbors of 12071 using exp_v4es_033.npy model
+        ID  DIST                            NAME               H1                    H2
+  0  12071 0.000  CD / DAVID BOWIE / BLACKSTAR (           MUZICA      CD International
+  1  11418 0.644  CD / DAVID BOWIE / BEST OF BOW           MUZICA      CD International
+  2   4416 0.645  CD / COLDPLAY / 4 CD CATALOGUE           MUZICA      CD International
+  3   4865 0.663  CD / COLDPLAY / A HEAD FULL OF           MUZICA      CD International
+  4   9745 0.665  MASINI DIE-CAST 7.5cm III ASST          JUCARII               JUCARII
+  5   7933 0.675     CUVINTE INCRUCISATE/ IQ FUN        CARTE ROM    CARTI PENTRU COPII
+  6   8392 0.676                13.2X2.5CM PLATE  ACCESORII GASTR  Accesorii servit mas
+  7  10135 0.678  BUCATARIE ITALIANA 100 DE RETE        CARTE ROM           GASTRONOMIE
+  8   4400 0.682  CARTEA SARUTURILOR / IV CEL NA        CARTE ROM  POEZIE / TEATRU / ST
+  9  12266 0.697  TIM DEDOPULOS / HERCULE POIROT        CARTE ROM  PRACTIC / TIMP LIBER
+================================================================================================
+================================================================================================
+== Iteration 1: ================================================================================
+================================================================================================
+{'method': 'v4_th', 'batch_size': 256, 'dist': 'l1'}
+================================================================================================
+
+Performing retrofitting on (13000, 128) embedding matrix...
+  Product(s):  None
+  Full edges:  True
+  Method:      _get_retrofitted_embeds_v4_th
+  Pos edges: 13000
+  Neg edges: 13000
+Starting `_get_retrofitted_embeds_v4_th()` retrofit function
+  Preparing retrofit data based on dict(13000)...
+    Positive edges: 13000
+    Negative edges: 13000
+  Preparing torch model...
+  Training model for 99 epochs, batch=256, lr=5.0e-02, tol=1.0e-03, negative margin: 128, dist=l1, fixed_weights=None
+    Epoch 01/99 - loss: 31560.46 (P/R/N: 551.11/13510.24/17499.11), change:14.188, time: 2.7s, batch: 256, fails: 0
+    Epoch 02/99 - loss: 31231.50 (P/R/N: 1635.04/13488.09/16108.37), change:9.686, time: 2.5s, batch: 256, fails: 0
+    Epoch 03/99 - loss: 30602.82 (P/R/N: 2170.10/13046.93/15385.79), change:6.913, time: 2.5s, batch: 256, fails: 0
+    Epoch 04/99 - loss: 30050.04 (P/R/N: 2542.56/12967.30/14540.18), change:6.403, time: 2.5s, batch: 256, fails: 0
+    Epoch 05/99 - loss: 29598.62 (P/R/N: 2953.60/12916.93/13728.09), change:6.254, time: 2.6s, batch: 256, fails: 0
+    Epoch 06/99 - loss: 29169.32 (P/R/N: 3326.38/12892.11/12950.84), change:6.025, time: 2.5s, batch: 256, fails: 0
+    Epoch 07/99 - loss: 28817.88 (P/R/N: 3702.97/12894.46/12220.46), change:5.953, time: 2.5s, batch: 256, fails: 0
+    Epoch 08/99 - loss: 28482.91 (P/R/N: 4028.25/12893.67/11560.99), change:5.768, time: 2.5s, batch: 256, fails: 0
+    Epoch 09/99 - loss: 28204.15 (P/R/N: 4353.81/12905.20/10945.14), change:5.664, time: 2.5s, batch: 256, fails: 0
+    Epoch 10/99 - loss: 27942.06 (P/R/N: 4642.26/12901.33/10398.46), change:5.563, time: 2.5s, batch: 256, fails: 0
+    Epoch 11/99 - loss: 27709.25 (P/R/N: 4927.54/12916.38/9865.33), change:5.405, time: 2.5s, batch: 256, fails: 0
+    Epoch 12/99 - loss: 27492.98 (P/R/N: 5185.17/12910.25/9397.55), change:5.408, time: 2.5s, batch: 256, fails: 0
+    Epoch 13/99 - loss: 27294.68 (P/R/N: 5431.12/12912.01/8951.54), change:5.321, time: 2.7s, batch: 256, fails: 0
+    Epoch 14/99 - loss: 27124.16 (P/R/N: 5672.13/12895.63/8556.40), change:5.290, time: 2.5s, batch: 256, fails: 0
+    Epoch 15/99 - loss: 26952.76 (P/R/N: 5888.82/12886.71/8177.24), change:5.253, time: 2.5s, batch: 256, fails: 0
+    Epoch 16/99 - loss: 26805.55 (P/R/N: 6097.01/12862.88/7845.65), change:5.189, time: 2.5s, batch: 256, fails: 0
+    Epoch 17/99 - loss: 26663.22 (P/R/N: 6290.36/12832.40/7540.45), change:5.144, time: 2.9s, batch: 256, fails: 0
+    Epoch 18/99 - loss: 26534.67 (P/R/N: 6474.14/12797.82/7262.71), change:5.190, time: 2.5s, batch: 256, fails: 0
+    Epoch 19/99 - loss: 26410.69 (P/R/N: 6648.36/12761.87/7000.46), change:5.168, time: 2.5s, batch: 256, fails: 0
+    Epoch 20/99 - loss: 26295.95 (P/R/N: 6820.51/12726.97/6748.47), change:5.217, time: 2.5s, batch: 256, fails: 0
+    Epoch 21/99 - loss: 26181.93 (P/R/N: 6973.30/12685.10/6523.54), change:5.157, time: 2.5s, batch: 256, fails: 0
+    Epoch 22/99 - loss: 26078.75 (P/R/N: 7127.67/12639.40/6311.68), change:5.169, time: 2.5s, batch: 256, fails: 0
+    Epoch 23/99 - loss: 25976.23 (P/R/N: 7277.56/12599.77/6098.90), change:5.205, time: 2.5s, batch: 256, fails: 0
+    Epoch 24/99 - loss: 25880.84 (P/R/N: 7410.63/12544.78/5925.43), change:5.139, time: 2.7s, batch: 256, fails: 0
+    Epoch 25/99 - loss: 25783.59 (P/R/N: 7542.44/12500.12/5741.03), change:5.209, time: 2.5s, batch: 256, fails: 0
+    Epoch 26/99 - loss: 25696.57 (P/R/N: 7673.95/12447.54/5575.08), change:5.209, time: 2.5s, batch: 256, fails: 0
+    Epoch 27/99 - loss: 25610.76 (P/R/N: 7791.50/12389.15/5430.10), change:5.152, time: 2.5s, batch: 256, fails: 0
+    Epoch 28/99 - loss: 25526.78 (P/R/N: 7908.36/12338.39/5280.04), change:5.173, time: 2.6s, batch: 256, fails: 0
+    Epoch 29/99 - loss: 25449.99 (P/R/N: 8020.68/12284.45/5144.86), change:5.228, time: 2.5s, batch: 256, fails: 0
+    Epoch 30/99 - loss: 25370.80 (P/R/N: 8125.31/12229.95/5015.53), change:5.188, time: 2.5s, batch: 256, fails: 0
+    Epoch 31/99 - loss: 25297.39 (P/R/N: 8230.04/12177.18/4890.17), change:5.220, time: 2.5s, batch: 256, fails: 0
+    Epoch 32/99 - loss: 25227.29 (P/R/N: 8326.05/12117.26/4783.97), change:5.247, time: 2.5s, batch: 256, fails: 0
+    Epoch 33/99 - loss: 25155.75 (P/R/N: 8423.58/12065.30/4666.88), change:5.286, time: 2.5s, batch: 256, fails: 0
+    Epoch 34/99 - loss: 25094.85 (P/R/N: 8516.15/12008.39/4570.31), change:5.293, time: 2.5s, batch: 256, fails: 0
+    Epoch 35/99 - loss: 25026.04 (P/R/N: 8602.41/11950.95/4472.68), change:5.323, time: 2.5s, batch: 256, fails: 0
+    Epoch 36/99 - loss: 24964.67 (P/R/N: 8693.78/11896.40/4374.49), change:5.317, time: 2.7s, batch: 256, fails: 0
+    Epoch 37/99 - loss: 24900.73 (P/R/N: 8767.73/11834.76/4298.25), change:5.506, time: 2.5s, batch: 256, fails: 0
+    Epoch 38/99 - loss: 24841.04 (P/R/N: 8849.13/11782.40/4209.50), change:5.402, time: 2.5s, batch: 256, fails: 0
+    Epoch 39/99 - loss: 24786.63 (P/R/N: 8931.45/11730.41/4124.77), change:5.401, time: 2.5s, batch: 256, fails: 0
+    Epoch 40/99 - loss: 24726.09 (P/R/N: 8998.42/11670.37/4057.29), change:5.352, time: 2.7s, batch: 256, fails: 0
+    Epoch 41/99 - loss: 24675.29 (P/R/N: 9077.22/11619.76/3978.31), change:5.457, time: 2.9s, batch: 256, fails: 0
+    Epoch 42/99 - loss: 24623.30 (P/R/N: 9143.10/11562.11/3918.08), change:5.473, time: 2.6s, batch: 256, fails: 0
+    Epoch 43/99 - loss: 24568.68 (P/R/N: 9217.39/11516.42/3834.87), change:5.379, time: 2.7s, batch: 256, fails: 0
+    Epoch 44/99 - loss: 24517.52 (P/R/N: 9276.63/11457.65/3783.24), change:5.511, time: 2.5s, batch: 256, fails: 0
+    Epoch 45/99 - loss: 24470.98 (P/R/N: 9343.80/11406.86/3720.32), change:5.524, time: 2.6s, batch: 256, fails: 0
+    Epoch 46/99 - loss: 24424.62 (P/R/N: 9410.25/11360.68/3653.70), change:5.533, time: 2.5s, batch: 256, fails: 0
+    Epoch 47/99 - loss: 24373.36 (P/R/N: 9462.78/11300.59/3609.99), change:5.504, time: 2.7s, batch: 256, fails: 0
+    Epoch 48/99 - loss: 24328.33 (P/R/N: 9528.37/11258.11/3541.85), change:5.671, time: 2.6s, batch: 256, fails: 0
+    Epoch 49/99 - loss: 24287.00 (P/R/N: 9587.24/11209.00/3490.75), change:5.610, time: 2.5s, batch: 256, fails: 0
+    Epoch 50/99 - loss: 24243.58 (P/R/N: 9643.43/11159.81/3440.34), change:5.639, time: 2.6s, batch: 256, fails: 0
+    Epoch 51/99 - loss: 24194.72 (P/R/N: 9695.40/11109.58/3389.73), change:5.664, time: 2.7s, batch: 256, fails: 0
+    Epoch 52/99 - loss: 24155.22 (P/R/N: 9750.18/11063.03/3342.00), change:5.753, time: 2.6s, batch: 256, fails: 0
+    Epoch 53/99 - loss: 24116.63 (P/R/N: 9801.82/11009.56/3305.25), change:5.700, time: 2.6s, batch: 256, fails: 0
+    Epoch 54/99 - loss: 24074.51 (P/R/N: 9854.87/10966.07/3253.57), change:5.785, time: 2.5s, batch: 256, fails: 0
+    Epoch 55/99 - loss: 24036.84 (P/R/N: 9905.84/10923.41/3207.59), change:5.715, time: 10.6s, batch: 256, fails: 0
+    Epoch 56/99 - loss: 23998.29 (P/R/N: 9954.47/10874.81/3169.01), change:5.704, time: 2.5s, batch: 256, fails: 0
+    Epoch 57/99 - loss: 23960.79 (P/R/N: 9998.30/10828.88/3133.60), change:5.812, time: 2.6s, batch: 256, fails: 0
+    Epoch 58/99 - loss: 23921.55 (P/R/N: 10042.27/10782.15/3097.12), change:5.850, time: 2.5s, batch: 256, fails: 0
+    Epoch 59/99 - loss: 23885.83 (P/R/N: 10088.99/10740.68/3056.17), change:5.878, time: 2.7s, batch: 256, fails: 0
+    Epoch 60/99 - loss: 23853.51 (P/R/N: 10132.30/10695.70/3025.51), change:5.866, time: 2.8s, batch: 256, fails: 0
+    Epoch 61/99 - loss: 23818.19 (P/R/N: 10178.00/10657.24/2982.96), change:5.810, time: 2.5s, batch: 256, fails: 0
+    Epoch 62/99 - loss: 23786.61 (P/R/N: 10218.80/10611.52/2956.29), change:5.915, time: 2.5s, batch: 256, fails: 0
+    Epoch 63/99 - loss: 23754.27 (P/R/N: 10259.41/10570.79/2924.07), change:5.918, time: 2.7s, batch: 256, fails: 0
+    Epoch 64/99 - loss: 23718.33 (P/R/N: 10302.32/10533.83/2882.17), change:5.978, time: 2.5s, batch: 256, fails: 0
+    Epoch 65/99 - loss: 23690.61 (P/R/N: 10343.64/10487.92/2859.05), change:6.050, time: 2.5s, batch: 256, fails: 0
+    Epoch 66/99 - loss: 23654.91 (P/R/N: 10381.53/10448.83/2824.56), change:6.040, time: 2.6s, batch: 256, fails: 0
+    Epoch 67/99 - loss: 23629.75 (P/R/N: 10420.51/10404.84/2804.41), change:6.066, time: 2.5s, batch: 256, fails: 0
+    Epoch 68/99 - loss: 23595.78 (P/R/N: 10458.48/10369.98/2767.32), change:6.073, time: 3.0s, batch: 256, fails: 0
+    Epoch 69/99 - loss: 23570.65 (P/R/N: 10498.97/10332.78/2738.90), change:6.037, time: 2.5s, batch: 256, fails: 0
+    Epoch 70/99 - loss: 23538.02 (P/R/N: 10533.79/10288.79/2715.43), change:6.086, time: 2.8s, batch: 256, fails: 0
+    Epoch 71/99 - loss: 23510.51 (P/R/N: 10567.58/10255.74/2687.18), change:6.077, time: 2.6s, batch: 256, fails: 0
+    Epoch 72/99 - loss: 23481.76 (P/R/N: 10601.56/10215.95/2664.25), change:6.263, time: 2.5s, batch: 256, fails: 0
+    Epoch 73/99 - loss: 23455.21 (P/R/N: 10639.54/10178.50/2637.17), change:6.206, time: 2.6s, batch: 256, fails: 0
+    Epoch 74/99 - loss: 23423.93 (P/R/N: 10671.42/10145.06/2607.45), change:6.222, time: 2.7s, batch: 256, fails: 0
+    Epoch 75/99 - loss: 23401.40 (P/R/N: 10706.99/10110.91/2583.50), change:6.339, time: 2.5s, batch: 256, fails: 0
+    Epoch 76/99 - loss: 23374.11 (P/R/N: 10737.03/10069.87/2567.21), change:6.369, time: 2.5s, batch: 256, fails: 0
+    Epoch 77/99 - loss: 23351.75 (P/R/N: 10774.03/10042.39/2535.34), change:6.186, time: 2.5s, batch: 256, fails: 0
+    Epoch 78/99 - loss: 23325.13 (P/R/N: 10803.21/10004.44/2517.48), change:6.335, time: 2.5s, batch: 256, fails: 0
+    Epoch 79/99 - loss: 23296.54 (P/R/N: 10833.13/9972.50/2490.91), change:6.415, time: 2.5s, batch: 256, fails: 0
+    Epoch 80/99 - loss: 23274.00 (P/R/N: 10865.30/9935.71/2472.99), change:6.497, time: 2.5s, batch: 256, fails: 0
+    Epoch 81/99 - loss: 23252.35 (P/R/N: 10898.31/9906.79/2447.24), change:6.494, time: 2.5s, batch: 256, fails: 0
+    Epoch 82/99 - loss: 23227.37 (P/R/N: 10924.23/9871.11/2432.02), change:6.477, time: 2.7s, batch: 256, fails: 0
+    Epoch 83/99 - loss: 23204.37 (P/R/N: 10956.84/9842.19/2405.33), change:6.445, time: 2.8s, batch: 256, fails: 0
+    Epoch 84/99 - loss: 23179.87 (P/R/N: 10984.48/9804.47/2390.91), change:6.639, time: 2.6s, batch: 256, fails: 0
+    Epoch 85/99 - loss: 23157.54 (P/R/N: 11009.53/9778.69/2369.32), change:6.607, time: 2.6s, batch: 256, fails: 0
+    Epoch 86/99 - loss: 23137.00 (P/R/N: 11043.94/9744.96/2348.10), change:6.531, time: 2.7s, batch: 256, fails: 0
+    Epoch 87/99 - loss: 23117.02 (P/R/N: 11071.37/9714.65/2331.00), change:6.549, time: 2.5s, batch: 256, fails: 0
+    Epoch 88/99 - loss: 23095.15 (P/R/N: 11099.24/9690.97/2304.93), change:6.692, time: 2.5s, batch: 256, fails: 0
+    Epoch 89/99 - loss: 23072.46 (P/R/N: 11121.46/9652.01/2298.99), change:6.793, time: 2.6s, batch: 256, fails: 0
+    Epoch 90/99 - loss: 23052.80 (P/R/N: 11154.11/9625.71/2272.98), change:6.736, time: 2.5s, batch: 256, fails: 0
+    Epoch 91/99 - loss: 23036.17 (P/R/N: 11177.72/9595.23/2263.22), change:6.786, time: 2.6s, batch: 256, fails: 0
+    Epoch 92/99 - loss: 23009.92 (P/R/N: 11200.40/9563.80/2245.72), change:6.873, time: 2.5s, batch: 256, fails: 0
+    Epoch 93/99 - loss: 22992.38 (P/R/N: 11232.20/9542.64/2217.54), change:6.921, time: 2.7s, batch: 256, fails: 0
+    Epoch 94/99 - loss: 22973.70 (P/R/N: 11256.92/9512.80/2203.98), change:6.897, time: 2.5s, batch: 256, fails: 0
+    Epoch 95/99 - loss: 22952.00 (P/R/N: 11277.40/9475.29/2199.31), change:6.940, time: 2.5s, batch: 256, fails: 0
+    Epoch 96/99 - loss: 22928.75 (P/R/N: 11303.55/9452.77/2172.42), change:6.998, time: 2.5s, batch: 256, fails: 0
+    Epoch 97/99 - loss: 22911.31 (P/R/N: 11335.09/9424.31/2151.90), change:6.948, time: 2.7s, batch: 256, fails: 0
+    Epoch 98/99 - loss: 22892.89 (P/R/N: 11358.22/9397.81/2136.86), change:7.081, time: 2.6s, batch: 256, fails: 0
+    Epoch 99/99 - loss: 22872.23 (P/R/N: 11376.04/9361.13/2135.06), change:7.153, time: 2.5s, batch: 256, fails: 0
+Retrofit with '_get_retrofitted_embeds_v4_th' took 269.8s
+Total 12997 embeddings modified
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR ('  using model exp_v4es_033.npy
+  Distance from positive 11418:  0.644
+  Distance from negative 9745:   0.665
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR ('  using model exp_v4es_033.npy_RETRO
+  Distance from positive 11418:  0.148
+  Distance from negative 9745:   0.748
+
+  Table: Non-filtered neighbors of 12071 using retrofitted exp_v4es_033.npy model
+        ID  DIST                            NAME      H1                H2
+  0  12071 0.000  CD / DAVID BOWIE / BLACKSTAR (  MUZICA  CD International
+  1   6275 0.112  CD / LANA DEL REY / LUST FOR L  MUZICA  CD International
+  2   1175 0.121  CD / QUEEN / GREATEST HITS (20  MUZICA  CD International
+  3   1408 0.122  CD / QUEEN / THE PLATINUM COLL  MUZICA  CD International
+  4  12238 0.128  CD / RED HOT CHILI PEPPERS / T  MUZICA  CD International
+  5   9991 0.131  CD / LED ZEPPELIN / REMASTERS   MUZICA  CD International
+  6   4416 0.135  CD / COLDPLAY / 4 CD CATALOGUE  MUZICA  CD International
+  7  12888 0.136  CD / EURYTHMICS / GREATEST HIT  MUZICA  CD International
+  8   1032 0.139  CD / QUEEN / BOHEMIAN RHAPSODY  MUZICA  CD International
+  9   2490 0.142  CD / BILLIE EILISH / WHEN WE A  MUZICA  CD International
+================================================================================================
+================================================================================================
+== Iteration 2: ================================================================================
+================================================================================================
+{'method': 'v4_th', 'batch_size': 256, 'dist': 'l2'}
+================================================================================================
+
+Performing retrofitting on (13000, 128) embedding matrix...
+  Product(s):  None
+  Full edges:  True
+  Method:      _get_retrofitted_embeds_v4_th
+  Pos edges: 13000
+  Neg edges: 13000
+Starting `_get_retrofitted_embeds_v4_th()` retrofit function
+  Preparing retrofit data based on dict(13000)...
+    Positive edges: 13000
+    Negative edges: 13000
+  Preparing torch model...
+  Training model for 99 epochs, batch=256, lr=5.0e-02, tol=1.0e-03, negative margin: 128, dist=l2, fixed_weights=None
+    Epoch 01/99 - loss: 30619.27 (P/R/N: 27.77/8693.74/21897.77), change:15.604, time: 2.8s, batch: 256, fails: 0
+    Epoch 02/99 - loss: 28127.33 (P/R/N: 235.92/7778.60/20112.81), change:11.985, time: 3.2s, batch: 256, fails: 0
+    Epoch 03/99 - loss: 25860.75 (P/R/N: 665.64/7619.76/17575.36), change:13.974, time: 2.8s, batch: 256, fails: 0
+    Epoch 04/99 - loss: 23627.82 (P/R/N: 1288.11/7962.78/14376.93), change:15.503, time: 2.7s, batch: 256, fails: 0
+    Epoch 05/99 - loss: 21572.28 (P/R/N: 2018.47/8442.16/11111.65), change:16.793, time: 2.7s, batch: 256, fails: 0
+    Epoch 06/99 - loss: 19830.42 (P/R/N: 2760.02/8787.92/8282.48), change:18.077, time: 2.9s, batch: 256, fails: 0
+    Epoch 07/99 - loss: 18436.36 (P/R/N: 3462.42/8902.46/6071.48), change:18.760, time: 2.7s, batch: 256, fails: 0
+    Epoch 08/99 - loss: 17303.83 (P/R/N: 4097.75/8783.38/4422.70), change:19.478, time: 2.8s, batch: 256, fails: 0
+    Epoch 09/99 - loss: 16372.03 (P/R/N: 4630.27/8422.39/3319.37), change:20.018, time: 2.7s, batch: 256, fails: 0
+    Epoch 10/99 - loss: 15610.27 (P/R/N: 5107.99/7975.56/2526.73), change:20.609, time: 2.7s, batch: 256, fails: 0
+    Epoch 11/99 - loss: 14951.45 (P/R/N: 5520.77/7458.10/1972.58), change:20.972, time: 2.7s, batch: 256, fails: 0
+    Epoch 12/99 - loss: 14389.68 (P/R/N: 5890.18/6910.89/1588.61), change:21.333, time: 2.8s, batch: 256, fails: 0
+    Epoch 13/99 - loss: 13904.32 (P/R/N: 6230.46/6365.20/1308.67), change:21.454, time: 2.9s, batch: 256, fails: 0
+    Epoch 14/99 - loss: 13496.64 (P/R/N: 6530.51/5846.07/1120.06), change:21.988, time: 2.7s, batch: 256, fails: 0
+    Epoch 15/99 - loss: 13113.21 (P/R/N: 6799.01/5353.04/961.16), change:21.882, time: 2.7s, batch: 256, fails: 0
+    Epoch 16/99 - loss: 12829.64 (P/R/N: 7053.28/4921.02/855.34), change:22.121, time: 2.8s, batch: 256, fails: 0
+    Epoch 17/99 - loss: 12569.68 (P/R/N: 7284.28/4526.89/758.51), change:22.396, time: 2.9s, batch: 256, fails: 0
+    Epoch 18/99 - loss: 12375.57 (P/R/N: 7497.81/4186.02/691.74), change:22.539, time: 2.7s, batch: 256, fails: 0
+    Epoch 19/99 - loss: 12211.31 (P/R/N: 7676.78/3876.64/657.90), change:22.961, time: 2.8s, batch: 256, fails: 0
+    Epoch 20/99 - loss: 12065.23 (P/R/N: 7846.76/3617.55/600.92), change:22.699, time: 2.7s, batch: 256, fails: 0
+    Epoch 21/99 - loss: 11938.48 (P/R/N: 7970.35/3390.53/577.60), change:23.558, time: 2.7s, batch: 256, fails: 0
+    Epoch 22/99 - loss: 11865.61 (P/R/N: 8109.23/3206.12/550.27), change:23.641, time: 2.7s, batch: 256, fails: 0
+    Epoch 23/99 - loss: 11798.79 (P/R/N: 8221.98/3043.17/533.64), change:23.863, time: 2.8s, batch: 256, fails: 0
+    Epoch 24/99 - loss: 11746.08 (P/R/N: 8318.66/2906.93/520.49), change:23.877, time: 2.9s, batch: 256, fails: 0
+    Epoch 25/99 - loss: 11690.70 (P/R/N: 8397.59/2791.61/501.50), change:24.282, time: 2.9s, batch: 256, fails: 0
+    Epoch 26/99 - loss: 11656.87 (P/R/N: 8473.52/2687.77/495.59), change:24.520, time: 2.7s, batch: 256, fails: 0
+    Epoch 27/99 - loss: 11637.14 (P/R/N: 8541.70/2614.29/481.16), change:24.797, time: 2.7s, batch: 256, fails: 0
+    Epoch 28/99 - loss: 11605.62 (P/R/N: 8592.17/2541.12/472.33), change:25.045, time: 2.7s, batch: 256, fails: 0
+    Epoch 29/99 - loss: 11586.43 (P/R/N: 8631.57/2477.61/477.26), change:25.350, time: 2.9s, batch: 256, fails: 0
+    Epoch 30/99 - loss: 11577.63 (P/R/N: 8682.11/2432.30/463.21), change:25.390, time: 2.7s, batch: 256, fails: 0
+    Epoch 31/99 - loss: 11564.99 (P/R/N: 8728.73/2385.17/451.09), change:25.415, time: 2.7s, batch: 256, fails: 0
+    Epoch 32/99 - loss: 11531.30 (P/R/N: 8737.33/2343.87/450.10), change:25.739, time: 2.8s, batch: 256, fails: 0
+    Epoch 33/99 - loss: 11537.63 (P/R/N: 8764.05/2315.92/457.66), change:26.256, time: 2.7s, batch: 256, fails: 1
+    Epoch 34/99 - loss: 11517.30 (P/R/N: 8797.68/2287.37/432.25), change:26.112, time: 2.8s, batch: 256, fails: 0
+    Epoch 35/99 - loss: 11510.32 (P/R/N: 8803.63/2257.34/449.34), change:26.404, time: 2.7s, batch: 256, fails: 0
+    Epoch 36/99 - loss: 11510.50 (P/R/N: 8824.89/2242.60/443.02), change:26.387, time: 2.9s, batch: 256, fails: 1
+    Epoch 37/99 - loss: 11495.95 (P/R/N: 8836.64/2222.95/436.36), change:26.658, time: 2.7s, batch: 256, fails: 0
+    Epoch 38/99 - loss: 11495.94 (P/R/N: 8848.96/2209.18/437.81), change:26.982, time: 2.7s, batch: 256, fails: 0
+    Epoch 39/99 - loss: 11493.53 (P/R/N: 8871.68/2194.22/427.63), change:26.643, time: 2.7s, batch: 256, fails: 0
+    Epoch 40/99 - loss: 11480.79 (P/R/N: 8876.41/2181.39/423.00), change:27.045, time: 2.7s, batch: 256, fails: 0
+    Epoch 41/99 - loss: 11488.24 (P/R/N: 8882.40/2169.99/435.86), change:27.218, time: 3.0s, batch: 256, fails: 1
+    Epoch 42/99 - loss: 11465.18 (P/R/N: 8890.96/2158.96/415.26), change:26.986, time: 2.7s, batch: 256, fails: 0
+    Epoch 43/99 - loss: 11470.00 (P/R/N: 8886.91/2150.09/433.00), change:27.213, time: 2.7s, batch: 256, fails: 1
+    Epoch 44/99 - loss: 11459.10 (P/R/N: 8892.62/2142.65/423.83), change:27.108, time: 2.7s, batch: 256, fails: 0
+    Epoch 45/99 - loss: 11469.78 (P/R/N: 8915.87/2139.95/413.96), change:27.396, time: 3.0s, batch: 256, fails: 1
+    Epoch 46/99 - loss: 11463.67 (P/R/N: 8913.42/2133.49/416.76), change:27.464, time: 2.7s, batch: 256, fails: 2
+    Stopping traing at epoch 46
+Retrofit with '_get_retrofitted_embeds_v4_th' took 131.2s
+Total 12997 embeddings modified
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR ('  using model exp_v4es_033.npy
+  Distance from positive 11418:  0.644
+  Distance from negative 9745:   0.665
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR ('  using model exp_v4es_033.npy_RETRO
+  Distance from positive 11418:  0.043
+  Distance from negative 9745:   0.743
+
+  Table: Non-filtered neighbors of 12071 using retrofitted exp_v4es_033.npy model
+        ID  DIST                            NAME      H1                H2
+  0  12071 0.000  CD / DAVID BOWIE / BLACKSTAR (  MUZICA  CD International
+  1  12238 0.019  CD / RED HOT CHILI PEPPERS / T  MUZICA  CD International
+  2   4416 0.020  CD / COLDPLAY / 4 CD CATALOGUE  MUZICA  CD International
+  3   7004 0.020  CD / PINK MARTINI / JE DIS OUI  MUZICA  CD International
+  4  11625 0.021  CD / V/A / ULTIMATE ROCK (2015  MUZICA  CD International
+  5  12225 0.021  CD / FRANK SINATRA / NOTHING B  MUZICA  CD International
+  6   1408 0.022  CD / QUEEN / THE PLATINUM COLL  MUZICA  CD International
+  7  11718 0.022  CD / SIA / THIS IS ACTING (Del  MUZICA  CD International
+  8   8366 0.023  CD / ANGELA GHEORGHIU / ETERNA  MUZICA  CD International
+  9  12707 0.024  CD / INXS / THE VERY BEST (201  MUZICA  CD International
+================================================================================================
+================================================================================================
+== Iteration 3: ================================================================================
+================================================================================================
+{'method': 'v4_th', 'batch_size': 256, 'dist': 'cos', 'fixed_weights': None}
+================================================================================================
+
+Performing retrofitting on (13000, 128) embedding matrix...
+  Product(s):  None
+  Full edges:  True
+  Method:      _get_retrofitted_embeds_v4_th
+  Pos edges: 13000
+  Neg edges: 13000
+Starting `_get_retrofitted_embeds_v4_th()` retrofit function
+  Preparing retrofit data based on dict(13000)...
+    Positive edges: 13000
+    Negative edges: 13000
+  Preparing torch model...
+  Training model for 99 epochs, batch=256, lr=5.0e-02, tol=1.0e-03, negative margin: 1, dist=cos, fixed_weights=None
+    Epoch 01/99 - loss: 303.96 (P/R/N: 0.01/232.73/71.23), change:0.405, time: 3.1s, batch: 256, fails: 0
+    Epoch 02/99 - loss: 302.82 (P/R/N: 0.11/232.51/70.19), change:0.372, time: 3.0s, batch: 256, fails: 0
+    Epoch 03/99 - loss: 301.88 (P/R/N: 0.30/232.32/69.26), change:0.364, time: 3.2s, batch: 256, fails: 0
+    Epoch 04/99 - loss: 301.11 (P/R/N: 0.57/232.14/68.40), change:0.343, time: 3.0s, batch: 256, fails: 0
+    Epoch 05/99 - loss: 300.48 (P/R/N: 0.88/231.98/67.61), change:0.333, time: 3.1s, batch: 256, fails: 0
+    Epoch 06/99 - loss: 299.96 (P/R/N: 1.23/231.84/66.89), change:0.306, time: 3.0s, batch: 256, fails: 0
+    Epoch 07/99 - loss: 299.53 (P/R/N: 1.58/231.70/66.25), change:0.303, time: 3.1s, batch: 256, fails: 0
+    Epoch 08/99 - loss: 299.18 (P/R/N: 1.97/231.58/65.63), change:0.267, time: 3.1s, batch: 256, fails: 0
+    Epoch 09/99 - loss: 298.90 (P/R/N: 2.33/231.47/65.09), change:0.262, time: 3.1s, batch: 256, fails: 0
+    Epoch 10/99 - loss: 298.66 (P/R/N: 2.68/231.37/64.61), change:0.257, time: 3.0s, batch: 256, fails: 0
+    Epoch 11/99 - loss: 298.47 (P/R/N: 3.04/231.28/64.14), change:0.218, time: 3.4s, batch: 256, fails: 0
+    Epoch 12/99 - loss: 298.31 (P/R/N: 3.35/231.20/63.76), change:0.236, time: 3.1s, batch: 256, fails: 0
+    Epoch 13/99 - loss: 298.18 (P/R/N: 3.70/231.12/63.35), change:0.163, time: 3.1s, batch: 256, fails: 0
+    Epoch 14/99 - loss: 298.07 (P/R/N: 3.99/231.05/63.03), change:0.158, time: 3.2s, batch: 256, fails: 0
+    Epoch 15/99 - loss: 297.99 (P/R/N: 4.27/230.99/62.73), change:0.127, time: 3.6s, batch: 256, fails: 0
+    Epoch 16/99 - loss: 297.92 (P/R/N: 4.49/230.93/62.49), change:0.161, time: 3.2s, batch: 256, fails: 0
+    Epoch 17/99 - loss: 297.87 (P/R/N: 4.75/230.88/62.24), change:0.107, time: 3.1s, batch: 256, fails: 0
+    Epoch 18/99 - loss: 297.82 (P/R/N: 4.96/230.83/62.03), change:0.102, time: 3.1s, batch: 256, fails: 0
+    Epoch 19/99 - loss: 297.79 (P/R/N: 5.17/230.79/61.83), change:0.089, time: 3.1s, batch: 256, fails: 0
+    Epoch 20/99 - loss: 297.75 (P/R/N: 5.34/230.75/61.66), change:0.090, time: 3.1s, batch: 256, fails: 0
+    Epoch 21/99 - loss: 297.73 (P/R/N: 5.54/230.72/61.48), change:0.116, time: 3.0s, batch: 256, fails: 0
+    Epoch 22/99 - loss: 297.71 (P/R/N: 5.70/230.68/61.32), change:0.076, time: 3.1s, batch: 256, fails: 0
+    Epoch 23/99 - loss: 297.70 (P/R/N: 5.80/230.65/61.24), change:0.144, time: 3.3s, batch: 256, fails: 0
+    Epoch 24/99 - loss: 297.69 (P/R/N: 5.97/230.63/61.10), change:0.135, time: 3.1s, batch: 256, fails: 0
+    Epoch 25/99 - loss: 297.68 (P/R/N: 6.07/230.60/61.01), change:0.049, time: 3.0s, batch: 256, fails: 0
+    Epoch 26/99 - loss: 297.67 (P/R/N: 6.18/230.58/60.91), change:0.123, time: 3.0s, batch: 256, fails: 0
+    Epoch 27/99 - loss: 297.66 (P/R/N: 6.28/230.56/60.82), change:0.089, time: 3.3s, batch: 256, fails: 0
+    Epoch 28/99 - loss: 297.66 (P/R/N: 6.39/230.54/60.73), change:0.068, time: 3.1s, batch: 256, fails: 0
+    Epoch 29/99 - loss: 297.65 (P/R/N: 6.47/230.52/60.66), change:0.080, time: 3.0s, batch: 256, fails: 0
+    Epoch 30/99 - loss: 297.65 (P/R/N: 6.54/230.51/60.60), change:0.070, time: 3.1s, batch: 256, fails: 0
+    Epoch 31/99 - loss: 297.65 (P/R/N: 6.60/230.50/60.55), change:0.067, time: 3.1s, batch: 256, fails: 0
+    Epoch 32/99 - loss: 297.65 (P/R/N: 6.69/230.48/60.48), change:0.107, time: 3.1s, batch: 256, fails: 0
+    Epoch 33/99 - loss: 297.64 (P/R/N: 6.75/230.47/60.42), change:0.075, time: 3.3s, batch: 256, fails: 0
+    Epoch 34/99 - loss: 297.64 (P/R/N: 6.77/230.46/60.41), change:0.110, time: 3.4s, batch: 256, fails: 0
+    Epoch 35/99 - loss: 297.64 (P/R/N: 6.85/230.45/60.34), change:0.144, time: 3.1s, batch: 256, fails: 1
+    Epoch 36/99 - loss: 297.64 (P/R/N: 6.88/230.44/60.32), change:0.080, time: 3.1s, batch: 256, fails: 0
+    Epoch 37/99 - loss: 297.64 (P/R/N: 6.94/230.43/60.28), change:0.141, time: 3.1s, batch: 256, fails: 1
+    Epoch 38/99 - loss: 297.64 (P/R/N: 6.95/230.43/60.26), change:0.080, time: 3.2s, batch: 256, fails: 2
+    Stopping traing at epoch 38
+Retrofit with '_get_retrofitted_embeds_v4_th' took 122.3s
+Total 12997 embeddings modified
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR ('  using model exp_v4es_033.npy
+  Distance from positive 11418:  0.644
+  Distance from negative 9745:   0.665
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR ('  using model exp_v4es_033.npy_RETRO
+  Distance from positive 11418:  0.639
+  Distance from negative 9745:   0.701
+
+  Table: Non-filtered neighbors of 12071 using retrofitted exp_v4es_033.npy model
+        ID  DIST                            NAME               H1                    H2
+  0  12071 0.000  CD / DAVID BOWIE / BLACKSTAR (           MUZICA      CD International
+  1   4416 0.624  CD / COLDPLAY / 4 CD CATALOGUE           MUZICA      CD International
+  2  11418 0.639  CD / DAVID BOWIE / BEST OF BOW           MUZICA      CD International
+  3   4865 0.660  CD / COLDPLAY / A HEAD FULL OF           MUZICA      CD International
+  4   8403 0.685  1001 DE CARTI DE CITIT INTR-O         CARTE ROM  POEZIE / TEATRU / ST
+  5   7933 0.692     CUVINTE INCRUCISATE/ IQ FUN        CARTE ROM    CARTI PENTRU COPII
+  6   4263 0.693  COUNTRY MERRY CHRISTMAS / 3 M      PAPETARIE AA              Giftware
+  7   9745 0.701  MASINI DIE-CAST 7.5cm III ASST          JUCARII               JUCARII
+  8   4400 0.702  CARTEA SARUTURILOR / IV CEL NA        CARTE ROM  POEZIE / TEATRU / ST
+  9   8392 0.703                13.2X2.5CM PLATE  ACCESORII GASTR  Accesorii servit mas
+================================================================================================
+================================================================================================
+== Iteration 4: ================================================================================
+================================================================================================
+{'method': 'v4_th', 'batch_size': 256, 'dist': 'cos', 'fixed_weights': 1}
+================================================================================================
+
+Performing retrofitting on (13000, 128) embedding matrix...
+  Product(s):  None
+  Full edges:  True
+  Method:      _get_retrofitted_embeds_v4_th
+  Pos edges: 13000
+  Neg edges: 13000
+Starting `_get_retrofitted_embeds_v4_th()` retrofit function
+  Preparing retrofit data based on dict(13000)...
+    Positive edges: 13000
+    Negative edges: 13000
+  Preparing torch model...
+  Training model for 99 epochs, batch=256, lr=5.0e-02, tol=1.0e-03, negative margin: 1, dist=cos, fixed_weights=1
+    Epoch 01/99 - loss: 90276.08 (P/R/N: 1064.49/88962.12/249.47), change:395.504, time: 3.1s, batch: 256, fails: 0
+    Epoch 02/99 - loss: 23502.23 (P/R/N: 8461.07/14882.25/158.90), change:43.105, time: 3.1s, batch: 256, fails: 0
+    Epoch 03/99 - loss: 13070.22 (P/R/N: 8160.07/4796.38/113.78), change:37.540, time: 3.0s, batch: 256, fails: 0
+    Epoch 04/99 - loss: 10584.97 (P/R/N: 7748.82/2746.99/89.16), change:33.769, time: 3.3s, batch: 256, fails: 0
+    Epoch 05/99 - loss: 9192.61 (P/R/N: 7244.80/1873.42/74.39), change:30.292, time: 3.1s, batch: 256, fails: 0
+    Epoch 06/99 - loss: 8228.64 (P/R/N: 6765.83/1398.35/64.46), change:27.191, time: 3.1s, batch: 256, fails: 0
+    Epoch 07/99 - loss: 7511.80 (P/R/N: 6341.53/1113.15/57.12), change:24.475, time: 3.1s, batch: 256, fails: 0
+    Epoch 08/99 - loss: 6950.89 (P/R/N: 5974.48/924.96/51.45), change:21.901, time: 3.2s, batch: 256, fails: 0
+    Epoch 09/99 - loss: 6513.93 (P/R/N: 5666.47/800.58/46.87), change:19.672, time: 3.0s, batch: 256, fails: 0
+    Epoch 10/99 - loss: 6167.64 (P/R/N: 5408.63/715.90/43.11), change:17.690, time: 3.1s, batch: 256, fails: 0
+    Epoch 11/99 - loss: 5905.32 (P/R/N: 5194.23/671.24/39.84), change:18.322, time: 3.4s, batch: 256, fails: 0
+    Epoch 12/99 - loss: 5682.23 (P/R/N: 5022.44/622.65/37.15), change:14.883, time: 3.1s, batch: 256, fails: 0
+    Epoch 13/99 - loss: 5494.03 (P/R/N: 4878.50/580.89/34.64), change:13.293, time: 3.1s, batch: 256, fails: 0
+    Epoch 14/99 - loss: 5337.27 (P/R/N: 4760.14/544.54/32.59), change:11.202, time: 3.1s, batch: 256, fails: 0
+    Epoch 15/99 - loss: 5237.43 (P/R/N: 4664.22/542.62/30.59), change:11.847, time: 3.2s, batch: 256, fails: 0
+    Epoch 16/99 - loss: 5176.12 (P/R/N: 4589.75/557.49/28.88), change:15.515, time: 3.1s, batch: 256, fails: 0
+    Epoch 17/99 - loss: 5098.85 (P/R/N: 4533.86/537.72/27.27), change:10.884, time: 3.1s, batch: 256, fails: 0
+    Epoch 18/99 - loss: 5044.63 (P/R/N: 4484.78/534.05/25.80), change:16.685, time: 3.0s, batch: 256, fails: 0
+    Epoch 19/99 - loss: 5007.16 (P/R/N: 4453.04/529.67/24.44), change:11.301, time: 3.2s, batch: 256, fails: 0
+    Epoch 20/99 - loss: 4969.05 (P/R/N: 4420.77/525.02/23.26), change:10.562, time: 3.1s, batch: 256, fails: 0
+    Epoch 21/99 - loss: 4934.18 (P/R/N: 4398.76/513.25/22.17), change:8.503, time: 3.1s, batch: 256, fails: 0
+    Epoch 22/99 - loss: 4892.33 (P/R/N: 4380.59/490.53/21.21), change:7.965, time: 3.0s, batch: 256, fails: 0
+    Epoch 23/99 - loss: 5253.00 (P/R/N: 4363.18/869.44/20.38), change:31.987, time: 3.1s, batch: 256, fails: 1
+    Epoch 24/99 - loss: 22571.38 (P/R/N: 4419.76/18130.74/20.88), change:493.492, time: 3.1s, batch: 256, fails: 2
+    Stopping traing at epoch 24
+Retrofit with '_get_retrofitted_embeds_v4_th' took 77.1s
+Total 12997 embeddings modified
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR ('  using model exp_v4es_033.npy
+  Distance from positive 11418:  0.644
+  Distance from negative 9745:   0.665
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR ('  using model exp_v4es_033.npy_RETRO
+  Distance from positive 11418:  0.019
+  Distance from negative 9745:   0.791
+
+  Table: Non-filtered neighbors of 12071 using retrofitted exp_v4es_033.npy model
+        ID  DIST                            NAME      H1                H2
+  0  12071 0.000  CD / DAVID BOWIE / BLACKSTAR (  MUZICA  CD International
+  1  10967 0.000  CD / JULIO IGLESIAS / THE ESSE  MUZICA  CD International
+  2   6275 0.000  CD / LANA DEL REY / LUST FOR L  MUZICA  CD International
+  3  10780 0.000  CD / TWENTY ONE PILOTS / TRENC  MUZICA  CD International
+  4  12238 0.000  CD / RED HOT CHILI PEPPERS / T  MUZICA  CD International
+  5  12225 0.000  CD / FRANK SINATRA / NOTHING B  MUZICA  CD International
+  6   8366 0.000  CD / ANGELA GHEORGHIU / ETERNA  MUZICA  CD International
+  7  10749 0.000  CD / PANTERA / VULGAR DISPLAY   MUZICA  CD International
+  8  11703 0.000  CD / LEONARD COHEN / MORE BEST  MUZICA  CD International
+  9  11343 0.000  CD / BOB DYLAN / THE ESSENTIAL  MUZICA  CD International
+================================================================================================
+================================================================================================
+== Iteration 5: ================================================================================
+================================================================================================
+{'method': 'v5_tf', 'batch_size': 256, 'dist': 'l1'}
+================================================================================================
+
+Performing retrofitting on (13000, 128) embedding matrix...
+  Product(s):  None
+  Full edges:  True
+  Method:      _get_retrofitted_embeds_v5_tf
+  Pos edges: 13000
+  Neg edges: 13000
+Starting `_get_retrofitted_embeds_v5_tf()` retrofit function
+  Preparing retrofit data based on dict(13000)...
+    Positive edges: 13000
+    Negative edges: 13000
+  Preparing model...
+  Preparing dataset...
+  Training model for 99 epochs, batch=256, lr=5.0e-02, tol=1.0e-03, dist=l1, neg_margin=128
+    Epoch 01/99 - loss: 31592.94, change:15.551, time: 13.0s, batch: 256, fails: 0
+    Epoch 02/99 - loss: 31274.88, change:9.383, time: 11.5s, batch: 256, fails: 0
+    Epoch 03/99 - loss: 30637.13, change:6.591, time: 11.3s, batch: 256, fails: 0
+    Epoch 04/99 - loss: 30099.41, change:6.292, time: 11.4s, batch: 256, fails: 0
+    Epoch 05/99 - loss: 29660.79, change:6.117, time: 11.5s, batch: 256, fails: 0
+    Epoch 06/99 - loss: 29254.66, change:5.880, time: 11.9s, batch: 256, fails: 0
+    Epoch 07/99 - loss: 28917.51, change:5.786, time: 11.5s, batch: 256, fails: 0
+    Epoch 08/99 - loss: 28593.92, change:5.499, time: 11.4s, batch: 256, fails: 0
+    Epoch 09/99 - loss: 28330.44, change:5.473, time: 11.4s, batch: 256, fails: 0
+    Epoch 10/99 - loss: 28074.20, change:5.319, time: 11.6s, batch: 256, fails: 0
+    Epoch 11/99 - loss: 27855.93, change:5.290, time: 11.9s, batch: 256, fails: 0
+    Epoch 12/99 - loss: 27646.65, change:5.148, time: 11.5s, batch: 256, fails: 0
+    Epoch 13/99 - loss: 27452.78, change:5.178, time: 11.5s, batch: 256, fails: 0
+    Epoch 14/99 - loss: 27283.46, change:5.101, time: 11.6s, batch: 256, fails: 0
+    Epoch 15/99 - loss: 27122.83, change:5.009, time: 11.5s, batch: 256, fails: 0
+    Epoch 16/99 - loss: 26974.17, change:4.965, time: 11.9s, batch: 256, fails: 0
+    Epoch 17/99 - loss: 26839.14, change:4.949, time: 11.4s, batch: 256, fails: 0
+    Epoch 18/99 - loss: 26714.54, change:4.917, time: 11.5s, batch: 256, fails: 0
+    Epoch 19/99 - loss: 26593.03, change:4.858, time: 11.4s, batch: 256, fails: 0
+    Epoch 20/99 - loss: 26484.46, change:4.852, time: 11.4s, batch: 256, fails: 0
+    Epoch 21/99 - loss: 26374.08, change:4.798, time: 11.8s, batch: 256, fails: 0
+    Epoch 22/99 - loss: 26275.25, change:4.762, time: 11.4s, batch: 256, fails: 0
+    Epoch 23/99 - loss: 26177.68, change:4.797, time: 11.5s, batch: 256, fails: 0
+    Epoch 24/99 - loss: 26083.09, change:4.742, time: 11.4s, batch: 256, fails: 0
+    Epoch 25/99 - loss: 25993.29, change:4.773, time: 11.4s, batch: 256, fails: 0
+    Epoch 26/99 - loss: 25907.73, change:4.741, time: 12.0s, batch: 256, fails: 0
+    Epoch 27/99 - loss: 25827.14, change:4.733, time: 11.5s, batch: 256, fails: 0
+    Epoch 28/99 - loss: 25746.05, change:4.767, time: 11.4s, batch: 256, fails: 0
+    Epoch 29/99 - loss: 25669.66, change:4.753, time: 11.4s, batch: 256, fails: 0
+    Epoch 30/99 - loss: 25596.42, change:4.710, time: 11.5s, batch: 256, fails: 0
+    Epoch 31/99 - loss: 25524.19, change:4.737, time: 11.5s, batch: 256, fails: 0
+    Epoch 32/99 - loss: 25455.04, change:4.655, time: 11.8s, batch: 256, fails: 0
+    Epoch 33/99 - loss: 25389.35, change:4.672, time: 11.5s, batch: 256, fails: 0
+    Epoch 34/99 - loss: 25329.12, change:4.744, time: 11.5s, batch: 256, fails: 0
+    Epoch 35/99 - loss: 25262.53, change:4.692, time: 11.4s, batch: 256, fails: 0
+    Epoch 36/99 - loss: 25206.18, change:4.678, time: 11.5s, batch: 256, fails: 0
+    Epoch 37/99 - loss: 25142.87, change:4.637, time: 12.1s, batch: 256, fails: 0
+    Epoch 38/99 - loss: 25087.19, change:4.674, time: 11.5s, batch: 256, fails: 0
+    Epoch 39/99 - loss: 25034.13, change:4.633, time: 11.4s, batch: 256, fails: 0
+    Epoch 40/99 - loss: 24981.87, change:4.673, time: 11.4s, batch: 256, fails: 0
+    Epoch 41/99 - loss: 24929.05, change:4.693, time: 11.5s, batch: 256, fails: 0
+    Epoch 42/99 - loss: 24876.75, change:4.646, time: 12.0s, batch: 256, fails: 0
+    Epoch 43/99 - loss: 24824.76, change:4.676, time: 11.4s, batch: 256, fails: 0
+    Epoch 44/99 - loss: 24780.58, change:4.633, time: 11.5s, batch: 256, fails: 0
+    Epoch 45/99 - loss: 24730.78, change:4.636, time: 11.5s, batch: 256, fails: 0
+    Epoch 46/99 - loss: 24683.42, change:4.683, time: 11.4s, batch: 256, fails: 0
+    Epoch 47/99 - loss: 24641.41, change:4.663, time: 11.8s, batch: 256, fails: 0
+    Epoch 48/99 - loss: 24595.32, change:4.741, time: 11.4s, batch: 256, fails: 0
+    Epoch 49/99 - loss: 24550.54, change:4.667, time: 11.5s, batch: 256, fails: 0
+    Epoch 50/99 - loss: 24512.54, change:4.636, time: 11.4s, batch: 256, fails: 0
+    Epoch 51/99 - loss: 24467.81, change:4.677, time: 11.4s, batch: 256, fails: 0
+    Epoch 52/99 - loss: 24432.63, change:4.715, time: 12.0s, batch: 256, fails: 0
+    Epoch 53/99 - loss: 24390.74, change:4.681, time: 11.5s, batch: 256, fails: 0
+    Epoch 54/99 - loss: 24353.76, change:4.671, time: 11.5s, batch: 256, fails: 0
+    Epoch 55/99 - loss: 24314.64, change:4.670, time: 11.4s, batch: 256, fails: 0
+    Epoch 56/99 - loss: 24278.40, change:4.688, time: 11.4s, batch: 256, fails: 0
+    Epoch 57/99 - loss: 24246.20, change:4.677, time: 12.0s, batch: 256, fails: 0
+    Epoch 58/99 - loss: 24206.22, change:4.650, time: 11.6s, batch: 256, fails: 0
+    Epoch 59/99 - loss: 24176.84, change:4.646, time: 11.4s, batch: 256, fails: 0
+    Epoch 60/99 - loss: 24142.16, change:4.637, time: 11.5s, batch: 256, fails: 0
+    Epoch 61/99 - loss: 24108.74, change:4.666, time: 11.5s, batch: 256, fails: 0
+    Epoch 62/99 - loss: 24075.20, change:4.641, time: 11.6s, batch: 256, fails: 0
+    Epoch 63/99 - loss: 24044.74, change:4.629, time: 11.9s, batch: 256, fails: 0
+    Epoch 64/99 - loss: 24015.24, change:4.684, time: 11.5s, batch: 256, fails: 0
+    Epoch 65/99 - loss: 23981.98, change:4.627, time: 11.4s, batch: 256, fails: 0
+    Epoch 66/99 - loss: 23954.08, change:4.703, time: 11.4s, batch: 256, fails: 0
+    Epoch 67/99 - loss: 23924.94, change:4.696, time: 11.5s, batch: 256, fails: 0
+    Epoch 68/99 - loss: 23894.24, change:4.664, time: 11.9s, batch: 256, fails: 0
+    Epoch 69/99 - loss: 23869.14, change:4.689, time: 11.4s, batch: 256, fails: 0
+    Epoch 70/99 - loss: 23840.54, change:4.677, time: 11.5s, batch: 256, fails: 0
+    Epoch 71/99 - loss: 23813.16, change:4.661, time: 11.4s, batch: 256, fails: 0
+    Epoch 72/99 - loss: 23785.90, change:4.712, time: 11.4s, batch: 256, fails: 0
+    Epoch 73/99 - loss: 23761.64, change:4.701, time: 11.7s, batch: 256, fails: 0
+    Epoch 74/99 - loss: 23737.36, change:4.695, time: 11.3s, batch: 256, fails: 0
+    Epoch 75/99 - loss: 23709.79, change:4.685, time: 11.3s, batch: 256, fails: 0
+    Epoch 76/99 - loss: 23689.71, change:4.754, time: 11.3s, batch: 256, fails: 0
+    Epoch 77/99 - loss: 23661.09, change:4.719, time: 11.4s, batch: 256, fails: 0
+    Epoch 78/99 - loss: 23640.49, change:4.772, time: 11.4s, batch: 256, fails: 0
+    Epoch 79/99 - loss: 23615.49, change:4.704, time: 11.4s, batch: 256, fails: 0
+    Epoch 80/99 - loss: 23594.51, change:4.755, time: 11.3s, batch: 256, fails: 0
+    Epoch 81/99 - loss: 23569.20, change:4.806, time: 11.3s, batch: 256, fails: 0
+    Epoch 82/99 - loss: 23551.23, change:4.747, time: 11.4s, batch: 256, fails: 0
+    Epoch 83/99 - loss: 23528.16, change:4.769, time: 11.4s, batch: 256, fails: 0
+    Epoch 84/99 - loss: 23506.11, change:4.785, time: 11.4s, batch: 256, fails: 0
+    Epoch 85/99 - loss: 23482.96, change:4.777, time: 11.4s, batch: 256, fails: 0
+    Epoch 86/99 - loss: 23466.41, change:4.764, time: 11.3s, batch: 256, fails: 0
+    Epoch 87/99 - loss: 23440.90, change:4.789, time: 11.3s, batch: 256, fails: 0
+    Epoch 88/99 - loss: 23422.60, change:4.765, time: 11.4s, batch: 256, fails: 0
+    Epoch 89/99 - loss: 23401.94, change:4.744, time: 11.8s, batch: 256, fails: 0
+    Epoch 90/99 - loss: 23380.73, change:4.810, time: 11.4s, batch: 256, fails: 0
+    Epoch 91/99 - loss: 23362.58, change:4.823, time: 11.4s, batch: 256, fails: 0
+    Epoch 92/99 - loss: 23343.16, change:4.846, time: 11.5s, batch: 256, fails: 0
+    Epoch 93/99 - loss: 23327.69, change:4.801, time: 11.4s, batch: 256, fails: 0
+    Epoch 94/99 - loss: 23302.42, change:4.797, time: 11.4s, batch: 256, fails: 0
+    Epoch 95/99 - loss: 23291.99, change:4.890, time: 11.4s, batch: 256, fails: 0
+    Epoch 96/99 - loss: 23269.77, change:4.899, time: 11.3s, batch: 256, fails: 0
+    Epoch 97/99 - loss: 23250.02, change:4.861, time: 11.4s, batch: 256, fails: 0
+    Epoch 98/99 - loss: 23234.57, change:4.945, time: 11.5s, batch: 256, fails: 0
+    Epoch 99/99 - loss: 23217.52, change:4.921, time: 11.4s, batch: 256, fails: 0
+Retrofit with '_get_retrofitted_embeds_v5_tf' took 1151.8s
+Total 12997 embeddings modified
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR ('  using model exp_v4es_033.npy
+  Distance from positive 11418:  0.644
+  Distance from negative 9745:   0.665
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR ('  using model exp_v4es_033.npy_RETRO
+  Distance from positive 11418:  0.238
+  Distance from negative 9745:   0.740
+
+  Table: Non-filtered neighbors of 12071 using retrofitted exp_v4es_033.npy model
+        ID  DIST                            NAME      H1                H2
+  0  12071 0.000  CD / DAVID BOWIE / BLACKSTAR (  MUZICA  CD International
+  1   6275 0.167  CD / LANA DEL REY / LUST FOR L  MUZICA  CD International
+  2  12238 0.168  CD / RED HOT CHILI PEPPERS / T  MUZICA  CD International
+  3   1175 0.186  CD / QUEEN / GREATEST HITS (20  MUZICA  CD International
+  4   4865 0.186  CD / COLDPLAY / A HEAD FULL OF  MUZICA  CD International
+  5  11406 0.186  CD / FLORENCE + THE MACHINE /   MUZICA  CD International
+  6   1408 0.187  CD / QUEEN / THE PLATINUM COLL  MUZICA  CD International
+  7   9991 0.188  CD / LED ZEPPELIN / REMASTERS   MUZICA  CD International
+  8  12862 0.189  CD / DREAM THEATER / THE TRIPL  MUZICA  CD International
+  9   4416 0.191  CD / COLDPLAY / 4 CD CATALOGUE  MUZICA  CD International
+================================================================================================
+================================================================================================
+== Iteration 6: ================================================================================
+================================================================================================
+{'method': 'v5_tf', 'batch_size': 256, 'dist': 'l2'}
+================================================================================================
+
+Performing retrofitting on (13000, 128) embedding matrix...
+  Product(s):  None
+  Full edges:  True
+  Method:      _get_retrofitted_embeds_v5_tf
+  Pos edges: 13000
+  Neg edges: 13000
+Starting `_get_retrofitted_embeds_v5_tf()` retrofit function
+  Preparing retrofit data based on dict(13000)...
+    Positive edges: 13000
+    Negative edges: 13000
+  Preparing model...
+  Preparing dataset...
+  Training model for 99 epochs, batch=256, lr=5.0e-02, tol=1.0e-03, dist=l2, neg_margin=128
+    Epoch 01/99 - loss: 30678.82, change:16.886, time: 12.1s, batch: 256, fails: 0
+    Epoch 02/99 - loss: 28146.93, change:12.147, time: 11.5s, batch: 256, fails: 0
+    Epoch 03/99 - loss: 25875.77, change:14.107, time: 11.5s, batch: 256, fails: 0
+    Epoch 04/99 - loss: 23630.41, change:15.732, time: 11.5s, batch: 256, fails: 0
+    Epoch 05/99 - loss: 21569.78, change:16.940, time: 11.5s, batch: 256, fails: 0
+    Epoch 06/99 - loss: 19836.18, change:18.004, time: 11.5s, batch: 256, fails: 0
+    Epoch 07/99 - loss: 18436.80, change:18.701, time: 11.5s, batch: 256, fails: 0
+    Epoch 08/99 - loss: 17340.53, change:19.243, time: 11.4s, batch: 256, fails: 0
+    Epoch 09/99 - loss: 16409.34, change:19.323, time: 11.5s, batch: 256, fails: 0
+    Epoch 10/99 - loss: 15639.24, change:19.636, time: 11.7s, batch: 256, fails: 0
+    Epoch 11/99 - loss: 14995.63, change:19.965, time: 11.7s, batch: 256, fails: 0
+    Epoch 12/99 - loss: 14413.39, change:19.951, time: 11.5s, batch: 256, fails: 0
+    Epoch 13/99 - loss: 13934.17, change:20.279, time: 11.5s, batch: 256, fails: 0
+    Epoch 14/99 - loss: 13520.18, change:20.134, time: 12.6s, batch: 256, fails: 0
+    Epoch 15/99 - loss: 13144.38, change:20.350, time: 11.5s, batch: 256, fails: 0
+    Epoch 16/99 - loss: 12866.28, change:20.562, time: 11.5s, batch: 256, fails: 0
+    Epoch 17/99 - loss: 12602.65, change:20.720, time: 11.6s, batch: 256, fails: 0
+    Epoch 18/99 - loss: 12406.43, change:21.017, time: 11.4s, batch: 256, fails: 0
+    Epoch 19/99 - loss: 12231.90, change:21.096, time: 11.5s, batch: 256, fails: 0
+    Epoch 20/99 - loss: 12108.40, change:21.290, time: 11.5s, batch: 256, fails: 0
+    Epoch 21/99 - loss: 11987.12, change:21.417, time: 11.5s, batch: 256, fails: 0
+    Epoch 22/99 - loss: 11910.88, change:21.803, time: 11.5s, batch: 256, fails: 0
+    Epoch 23/99 - loss: 11848.34, change:22.077, time: 11.5s, batch: 256, fails: 0
+    Epoch 24/99 - loss: 11777.63, change:22.265, time: 11.5s, batch: 256, fails: 0
+    Epoch 25/99 - loss: 11743.90, change:22.481, time: 11.5s, batch: 256, fails: 0
+    Epoch 26/99 - loss: 11707.45, change:22.881, time: 11.5s, batch: 256, fails: 0
+    Epoch 27/99 - loss: 11675.95, change:22.888, time: 11.5s, batch: 256, fails: 0
+    Epoch 28/99 - loss: 11660.07, change:23.200, time: 11.4s, batch: 256, fails: 0
+    Epoch 29/99 - loss: 11633.82, change:23.621, time: 11.4s, batch: 256, fails: 0
+    Epoch 30/99 - loss: 11623.82, change:23.610, time: 11.5s, batch: 256, fails: 0
+    Epoch 31/99 - loss: 11605.63, change:24.061, time: 11.4s, batch: 256, fails: 0
+    Epoch 32/99 - loss: 11594.63, change:23.874, time: 11.4s, batch: 256, fails: 0
+    Epoch 33/99 - loss: 11565.81, change:24.114, time: 11.3s, batch: 256, fails: 0
+    Epoch 34/99 - loss: 11578.12, change:24.377, time: 11.4s, batch: 256, fails: 1
+    Epoch 35/99 - loss: 11557.81, change:24.612, time: 11.5s, batch: 256, fails: 0
+    Epoch 36/99 - loss: 11569.62, change:24.925, time: 11.5s, batch: 256, fails: 1
+    Epoch 37/99 - loss: 11550.99, change:24.859, time: 11.7s, batch: 256, fails: 0
+    Epoch 38/99 - loss: 11541.85, change:24.832, time: 11.6s, batch: 256, fails: 0
+    Epoch 39/99 - loss: 11539.14, change:24.833, time: 11.5s, batch: 256, fails: 0
+    Epoch 40/99 - loss: 11528.94, change:25.211, time: 11.6s, batch: 256, fails: 0
+    Epoch 41/99 - loss: 11521.32, change:25.328, time: 11.8s, batch: 256, fails: 0
+    Epoch 42/99 - loss: 11518.22, change:25.639, time: 11.5s, batch: 256, fails: 0
+    Epoch 43/99 - loss: 11536.46, change:25.929, time: 11.5s, batch: 256, fails: 1
+    Epoch 44/99 - loss: 11507.38, change:25.515, time: 11.5s, batch: 256, fails: 0
+    Epoch 45/99 - loss: 11509.75, change:25.414, time: 11.5s, batch: 256, fails: 1
+    Epoch 46/99 - loss: 11512.40, change:25.744, time: 11.5s, batch: 256, fails: 2
+    Stopping traing at epoch 46
+Retrofit with '_get_retrofitted_embeds_v5_tf' took 536.7s
+Total 12997 embeddings modified
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR ('  using model exp_v4es_033.npy
+  Distance from positive 11418:  0.644
+  Distance from negative 9745:   0.665
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR ('  using model exp_v4es_033.npy_RETRO
+  Distance from positive 11418:  0.040
+  Distance from negative 9745:   0.752
+
+  Table: Non-filtered neighbors of 12071 using retrofitted exp_v4es_033.npy model
+        ID  DIST                            NAME      H1                H2
+  0  12071 0.000  CD / DAVID BOWIE / BLACKSTAR (  MUZICA  CD International
+  1   4416 0.020  CD / COLDPLAY / 4 CD CATALOGUE  MUZICA  CD International
+  2  12238 0.021  CD / RED HOT CHILI PEPPERS / T  MUZICA  CD International
+  3   7004 0.021  CD / PINK MARTINI / JE DIS OUI  MUZICA  CD International
+  4  11625 0.021  CD / V/A / ULTIMATE ROCK (2015  MUZICA  CD International
+  5  12225 0.022  CD / FRANK SINATRA / NOTHING B  MUZICA  CD International
+  6   1408 0.023  CD / QUEEN / THE PLATINUM COLL  MUZICA  CD International
+  7   8366 0.024  CD / ANGELA GHEORGHIU / ETERNA  MUZICA  CD International
+  8   6275 0.024  CD / LANA DEL REY / LUST FOR L  MUZICA  CD International
+  9   4772 0.025  CD / MILES DAVIS / KIND OF BLU  MUZICA  CD International
+================================================================================================
+================================================================================================
+== Iteration 7: ================================================================================
+================================================================================================
+{'method': 'v5_tf', 'batch_size': 256, 'dist': 'cos', 'fixed_weights': None}
+================================================================================================
+
+Performing retrofitting on (13000, 128) embedding matrix...
+  Product(s):  None
+  Full edges:  True
+  Method:      _get_retrofitted_embeds_v5_tf
+  Pos edges: 13000
+  Neg edges: 13000
+Starting `_get_retrofitted_embeds_v5_tf()` retrofit function
+  Preparing retrofit data based on dict(13000)...
+    Positive edges: 13000
+    Negative edges: 13000
+  Preparing model...
+  Preparing dataset...
+  Training model for 99 epochs, batch=256, lr=5.0e-02, tol=1.0e-03, dist=cos, neg_margin=1
+    Epoch 01/99 - loss: 315.47, change:20.221, time: 13.5s, batch: 256, fails: 0
+    Epoch 02/99 - loss: 1884.92, change:20.546, time: 12.4s, batch: 256, fails: 1
+    Epoch 03/99 - loss: 413.63, change:13.100, time: 12.4s, batch: 256, fails: 2
+    Stopping traing at epoch 3
+Retrofit with '_get_retrofitted_embeds_v5_tf' took 41.2s
+Total 12997 embeddings modified
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR ('  using model exp_v4es_033.npy
+  Distance from positive 11418:  0.644
+  Distance from negative 9745:   0.665
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR ('  using model exp_v4es_033.npy_RETRO
+  Distance from positive 11418:  0.686
+  Distance from negative 9745:   0.669
+
+  Table: Non-filtered neighbors of 12071 using retrofitted exp_v4es_033.npy model
+        ID  DIST                            NAME               H1                    H2
+  0  12071 0.000  CD / DAVID BOWIE / BLACKSTAR (           MUZICA      CD International
+  1  10135 0.567  BUCATARIE ITALIANA 100 DE RETE        CARTE ROM           GASTRONOMIE
+  2   8392 0.641                13.2X2.5CM PLATE  ACCESORII GASTR  Accesorii servit mas
+  3   7933 0.668     CUVINTE INCRUCISATE/ IQ FUN        CARTE ROM    CARTI PENTRU COPII
+  4   9745 0.669  MASINI DIE-CAST 7.5cm III ASST          JUCARII               JUCARII
+  5  11749 0.673  SILVIU NEGU? MARIUS-CRISTIAN N        CARTE ROM    CARTI PENTRU COPII
+  6   4865 0.681  CD / COLDPLAY / A HEAD FULL OF           MUZICA      CD International
+  7   4400 0.686  CARTEA SARUTURILOR / IV CEL NA        CARTE ROM  POEZIE / TEATRU / ST
+  8  11418 0.686  CD / DAVID BOWIE / BEST OF BOW           MUZICA      CD International
+  9  10523 0.690  WILLIAM MORRIS: SEAWEED MARINE  ACCESORII GASTR            Travel Mug
+================================================================================================
+================================================================================================
+== Iteration 8: ================================================================================
+================================================================================================
+{'method': 'v5_tf', 'batch_size': 256, 'dist': 'cos', 'fixed_weights': 1}
+================================================================================================
+
+Performing retrofitting on (13000, 128) embedding matrix...
+  Product(s):  None
+  Full edges:  True
+  Method:      _get_retrofitted_embeds_v5_tf
+  Pos edges: 13000
+  Neg edges: 13000
+Starting `_get_retrofitted_embeds_v5_tf()` retrofit function
+  Preparing retrofit data based on dict(13000)...
+    Positive edges: 13000
+    Negative edges: 13000
+  Preparing model...
+  Preparing dataset...
+  Training model for 99 epochs, batch=256, lr=5.0e-02, tol=1.0e-03, dist=cos, neg_margin=1
+    Epoch 01/99 - loss: 315.47, change:20.221, time: 13.3s, batch: 256, fails: 0
+    Epoch 02/99 - loss: 1884.92, change:20.546, time: 12.4s, batch: 256, fails: 1
+    Epoch 03/99 - loss: 413.63, change:13.100, time: 12.4s, batch: 256, fails: 2
+    Stopping traing at epoch 3
+Retrofit with '_get_retrofitted_embeds_v5_tf' took 41.0s
+Total 12997 embeddings modified
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR ('  using model exp_v4es_033.npy
+  Distance from positive 11418:  0.644
+  Distance from negative 9745:   0.665
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR ('  using model exp_v4es_033.npy_RETRO
+  Distance from positive 11418:  0.686
+  Distance from negative 9745:   0.669
+
+  Table: Non-filtered neighbors of 12071 using retrofitted exp_v4es_033.npy model
+        ID  DIST                            NAME               H1                    H2
+  0  12071 0.000  CD / DAVID BOWIE / BLACKSTAR (           MUZICA      CD International
+  1  10135 0.567  BUCATARIE ITALIANA 100 DE RETE        CARTE ROM           GASTRONOMIE
+  2   8392 0.641                13.2X2.5CM PLATE  ACCESORII GASTR  Accesorii servit mas
+  3   7933 0.668     CUVINTE INCRUCISATE/ IQ FUN        CARTE ROM    CARTI PENTRU COPII
+  4   9745 0.669  MASINI DIE-CAST 7.5cm III ASST          JUCARII               JUCARII
+  5  11749 0.673  SILVIU NEGU? MARIUS-CRISTIAN N        CARTE ROM    CARTI PENTRU COPII
+  6   4865 0.681  CD / COLDPLAY / A HEAD FULL OF           MUZICA      CD International
+  7   4400 0.686  CARTEA SARUTURILOR / IV CEL NA        CARTE ROM  POEZIE / TEATRU / ST
+  8  11418 0.686  CD / DAVID BOWIE / BEST OF BOW           MUZICA      CD International
+  9  10523 0.690  WILLIAM MORRIS: SEAWEED MARINE  ACCESORII GASTR            Travel Mug
