@@ -6,8 +6,6 @@ Created on Tue Apr  7 09:29:46 2020
 """
 
 import numpy as np
-from scipy import sparse
-import os
 import pandas as pd
 
 import matplotlib.pyplot as plt
@@ -90,9 +88,11 @@ chunk_reader.close()
 
 ## NLU meets BPA
 
+data_file = DATA_FILE if log.get_data_file(DATA_FILE) else DATA_SLICE_FILE
+
 if not print_df or 'csr_mco' not in globals():
   csr_mco, tran_sizes = generate_sparse_mco(
-      DATA_FILE, mco_out_file=MCO_OUT_FILE,
+      data_file, mco_out_file=MCO_OUT_FILE,
       return_counts=True, log=log,
       DEBUG=DEBUG, mco_file=_MCO_FILE,
       plot=not print_df)
@@ -114,22 +114,24 @@ show_categs(df_meta, dct_categories, k=5, log=log)
 
 ### Analogy with word-vectors
 
+
+
 if 'wemb' not in globals():
     log.P("Loading GloVe word embeddings")
-    glove_words_file = log.get_data_file('glove_words_and_embeds_100d.npz')
-    data = np.load(glove_words_file)
-    np_words = data['arr_0']
-    wemb = data['arr_1']
-
-def show_word(word):
-    show_neighbors(
-        idx=word, 
-        embeds=wemb, 
-        dct_i2n=np_words, 
-        log=log,
-        )
-    
-show_word('beatles')
+    data = log.load_np('glove_words_and_embeds_100d.npz')
+    if data != None:
+      np_words = data['arr_0']
+      wemb = data['arr_1']
+      
+      def show_word(word):
+          show_neighbors(
+              idx=word, 
+              embeds=wemb, 
+              dct_i2n=np_words, 
+              log=log,
+              )    
+      
+      show_word('beatles')
 
 
 ## Self-supervised training and supervised testing
@@ -186,11 +188,11 @@ def mrr_k(np_cands_batch, np_gold_batch, k=5):
 
 ## Hyperparameters & hand-picked validation data
 
-#EMBED_SIZE = 128
-#MAX_FREQ = 250
-#MAX_EPOCHS = 10000
-#RETROFIT_TOL = 1e-5
-#FULL_EDGES = True
+EMBED_SIZE = 128
+MAX_FREQ = 250
+MAX_EPOCHS = 10000
+RETROFIT_TOL = 1e-5
+FULL_EDGES = True
 
 test_items = [
     (12071, 11418, 9745), 
@@ -205,31 +207,32 @@ org_items = [x[0] for x in test_items]
 pos_items = [x[1] for x in test_items]
 neg_items = [x[2] for x in test_items]
 
-## ProVe implementation
+## ProVe 
 
-#
-#from prove.prove_model import ProVe
-#
-#prove_model = ProVe(
-#    default_embeds_file=EMB128_ES33,
-#    name='exp_v5es',
-#    log=log,
-#    )
-#
-#if prove_model.embeds is None:
-#    prove_model.fit(
-#        mco=np_mco,
-#        embed_size=EMBED_SIZE, 
-#        max_cooccure=MAX_FREQ, 
-#        epochs=5000, #MAX_EPOCHS,
-#        save_folder=MODEL_HOME,
-#        interactive_session=True,
-#        validation_data=(org_items, pos_items)
-#    )
-#
+GENERATE = False
 
-embeds_name = EMB128_ES33_FN #prove_model.name
-embeds = log.load_np(embeds_name, folder='models') # prove_model.embeds
+if GENERATE:
+  from prove.prove_model import ProVe
+  prove_model = ProVe(
+      default_embeds_file=EMB128_ES33_FN,
+      name='exp_v5es',
+      log=log,
+      )
+  
+  if prove_model.embeds is None:
+      prove_model.fit(
+          mco=np_mco,
+          embed_size=EMBED_SIZE, 
+          max_cooccure=MAX_FREQ, 
+          epochs=5000, #MAX_EPOCHS,
+          interactive_session=True,
+          validation_data=(org_items, pos_items)
+      )
+  embeds_name = prove_model.name
+  embeds = prove_model.embeds
+else:
+  embeds_name = EMB128_ES33_FN #prove_model.name
+  embeds = log.load_np(embeds_name, folder='models') # prove_model.embeds
 
 
 from prove.prove_engine import EmbedsEngine
@@ -259,57 +262,82 @@ dct_prod_info = prod_eng.get_item_info(exp_id, verbose=True, show_relations=True
 prod_eng.get_similar_items(exp_id, filtered=False, show=print_df, 
                            name='Non-filtered neighbors of {} using {} model'.format(
                                exp_id, embeds_name))    
-#
-# batch size 256 looks best
-#
-#
-DEBUG = False
-if DEBUG:
-  batch_size = 32 
-  eager = True
-else:
-  batch_size = 256
-  eager = False
-options = [
-    {'method':'v4_th', 'batch_size': batch_size, 'dist':'l1'},
-    {'method':'v4_th', 'batch_size': batch_size, 'dist':'l2'},
-    {'method':'v4_th', 'batch_size': batch_size, 'dist':'cos', 'fixed_weights': None},
-    {'method':'v4_th', 'batch_size': batch_size, 'dist':'cos', 'fixed_weights': 1},
 
-    {'method':'v5_tf', 'batch_size': batch_size, 'dist':'l1'},
-    {'method':'v5_tf', 'batch_size': batch_size, 'dist':'l2'},
-    {'method':'v5_tf', 'batch_size': batch_size, 'dist':'cos', 'fixed_weights': None},
-    {'method':'v5_tf', 'batch_size': batch_size, 'dist':'cos', 'fixed_weights': 1},
+FULL_RETROFIT = True
 
-    ]
-
-for itr_no, setting in enumerate(options):
-  log.P("================================================================================================")
-  log.P("================================================================================================")
-  log.P("== Iteration {}: ================================================================================".format(
-      itr_no + 1))
-  log.P("================================================================================================")
-  log.P("{}".format(setting))
-  log.P("================================================================================================")
-  new_embeds = prod_eng.get_retrofitted_embeds(
-#      prod_ids=exp_id, 
-#      dct_negative={exp_id:[neg_id]},
-      skip_negative=False,
-      DEBUG=DEBUG,
-      eager=eager,
-      **setting,
-      )
+if FULL_RETROFIT:
+  #
+  # batch size 256 looks best
+  #
+  #
+  DEBUG = False
+  if DEBUG:
+    batch_size = 32 
+    eager = True
+  else:
+    batch_size = 256
+    eager = False
+  options = [
+      {'method':'v4_th', 'batch_size': batch_size, 'dist':'l1'},
+  #    {'method':'v4_th', 'batch_size': batch_size, 'dist':'l2'},
+  #    {'method':'v4_th', 'batch_size': batch_size, 'dist':'cos', 'fixed_weights': None},
+  #    {'method':'v4_th', 'batch_size': batch_size, 'dist':'cos', 'fixed_weights': 1},
   
-  n_dif = (np.abs(new_embeds - embeds).sum(axis=1) > 1e-3).sum()
-  log.P("Total {} embeddings modified".format(n_dif))
+  #    {'method':'v5_tf', 'batch_size': batch_size, 'dist':'l1'},
+  #    {'method':'v5_tf', 'batch_size': batch_size, 'dist':'l2'},
+  #    {'method':'v5_tf', 'batch_size': batch_size, 'dist':'cos', 'fixed_weights': None},
+  #    {'method':'v5_tf', 'batch_size': batch_size, 'dist':'cos', 'fixed_weights': 1.0},
   
-  prod_eng.analize_item(exp_id, positive_id=pos_id, negative_id=neg_id, 
-                        embeds_name=embeds_name)
-  prod_eng.analize_item(exp_id, positive_id=pos_id, negative_id=neg_id, embeds=new_embeds,
-                        embeds_name=embeds_name+'_RETRO')   
-  prod_eng.get_similar_items(exp_id, embeds=new_embeds, filtered=False, show=print_df,
-                             name='Non-filtered neighbors of {} using retrofitted {} model'.format(
-                                 exp_id, embeds_name))    
+      ]
+  
+  for itr_no, setting in enumerate(options):
+    log.P("================================================================================================")
+    log.P("================================================================================================")
+    log.P("== Iteration {}: ================================================================================".format(
+        itr_no + 1))
+    log.P("================================================================================================")
+    log.P("{}".format(setting))
+    log.P("================================================================================================")
+    new_embeds = prod_eng.get_retrofitted_embeds(
+        prod_ids=exp_id, 
+        lr=0.02,
+  #      dct_negative={exp_id:[neg_id]},
+        skip_negative=False,
+        DEBUG=DEBUG,
+        eager=eager,
+        epochs=99,
+        **setting,
+        )
+    
+    n_dif = (np.abs(new_embeds - embeds).sum(axis=1) > 1e-3).sum()
+    log.P("Total {} embeddings modified".format(n_dif))
+    
+    prod_eng.analize_item(exp_id, positive_id=pos_id, negative_id=neg_id, 
+                          embeds_name=embeds_name)
+    prod_eng.analize_item(exp_id, positive_id=pos_id, negative_id=neg_id, embeds=new_embeds,
+                          embeds_name=embeds_name+'_RETRO')   
+    d = prod_eng.get_similar_items(exp_id, embeds=new_embeds, filtered=False, show=print_df,
+                               name='Non-filtered neighbors of {} using retrofitted {} model'.format(
+                                   exp_id, embeds_name))    
+    log.save_dataframe(d, 'neighbors', to_data=False)
+  
+k = 3
+_ = prod_eng.get_item_replacement(
+    prod_id=exp_id,
+    k=k,
+    as_dataframe=True,
+    verbose=True
+    )  
+
+k = 5
+_ = prod_eng.get_item_replacement(
+    prod_id=exp_id,
+    k=k,
+    as_dataframe=True,
+    verbose=True
+    )  
+  
+  
 
 ##############
 #df = prod_eng.get_similar_items(exp_id, embeds=new_embeds, filtered=True, show=print_df,

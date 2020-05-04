@@ -128,6 +128,7 @@ def generate_sparse_mco(file_name,
     df = log.load_dataframe(file_name)
     all_counts = df.groupby(basket_id_field)['IDE'].count()
   else:      
+    file_name = log.get_data_file(file_name)
     data_size = os.path.getsize(file_name)
     log.P("Reading transactional data file '{}' of size {:.2f} GB...".format(file_name, data_size / 1024**3))
     chunk_generator = pd.read_csv(file_name, chunksize=chunk_size)  
@@ -197,7 +198,7 @@ def generate_sparse_mco(file_name,
     plt.xlabel("Co-occurence count")    
     plt.show()
   log.P("Saving '{}'".format(mco_out_file))
-  sparse.save_npz(mco_out_file, csr_mco)
+  log.save_csr(mco_out_file, csr_mco, folder='models', use_prefix=False)
   if return_counts:
     return csr_mco, _h
   else:

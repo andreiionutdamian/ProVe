@@ -284,6 +284,7 @@ class EmbedsEngine(LummetryObject):
         
       
   def get_item_info(self, item_id, verbose=False, show_relations=False):
+    self.log.start_timer('get_item_info')
     predefined_names = ['ID','NAME', 'POS_EDGES', 'NEG_EDGES']
     dct_info = OrderedDict({})
     dct_info['ID'] = item_id
@@ -308,9 +309,10 @@ class EmbedsEngine(LummetryObject):
           else:
             # assume products
             df = self._items_to_df(dct_info[k])
-            self.P("  {} ({} items):".format(k, df.shape[0]))
-            self.P(textwrap.indent(str(df.head()),' ' * 4))
-            
+            self.P("  {} ({} items):\n{}".format(
+                k, df.shape[0],
+                textwrap.indent(str(df.head()),' ' * 4)))
+    self.log.end_timer('get_item_info')            
     return dct_info
   
   def analize_item(self, 
@@ -321,6 +323,7 @@ class EmbedsEngine(LummetryObject):
                    show_df=False,
                    embeds_name=None,
                    ):
+    self.log.start_timer('analize_item')
     if embeds is None:
       embeds = self.embeds      
     self.log.Pr("Performing analysis of item {}...".format(item_id))
@@ -343,6 +346,7 @@ class EmbedsEngine(LummetryObject):
       self.P(textwrap.indent(str(df_n), "    "))
       self.P("  Filtered neighbors:")
       self.P(textwrap.indent(str(df_f), "    "))
+    self.log.stop_timer('analize_item')
     return
     
 
@@ -353,6 +357,7 @@ class EmbedsEngine(LummetryObject):
                         show=False,
                         name=None
                         ):
+    self.log.start_timer('get_similar_items')
     if embeds is None:
       embeds = self.embeds
     if filtered:
@@ -383,16 +388,86 @@ class EmbedsEngine(LummetryObject):
     df = df_res.iloc[:k,:]
     if show:
       if name is not None:
-        self.P("")
-        self.P("  Table: {}".format(name))
+        title = "  Table: {}".format(name)
       else:
-        self.P("")
-        self.P("  Top neighbors for product {}:".format(item_id))
-      self.P(textwrap.indent(str(df), "  "))
+        title = "  Top neighbors for product {}:\n{}".format(item_id)
+      self.P("Similarity report:\n{}\n{}".format(
+          title,
+          textwrap.indent(str(df), "  ")
+          )
+      )
     else:
       if name is not None:
         self.log.Pmdc("Table: {}".format(name))
+    self.log.end_timer('get_similar_items')
     return df
+  
+  
+  #############################################################################
+  #############################################################################
+  #############################################################################
+  
+  
+  def cold_start_item(self, dct_categs, need_items=None, similar_items=None):
+    """
+    Steps:
+      1. USER: categ1, categ2...
+      2. SYS: embed
+      3. 
+      
+      
+      1. USER: categ1, categ2, interests categ
+    """
+    pass
+  
+  def get_item_replacement(self, prod_id, k=5, as_dataframe=False, verbose=True):    
+    idxs, dists = prove_utils.neighbors_by_idx(
+        idx=prod_id, 
+        embeds=self.embeds, 
+        k=10)
+    cands = idxs[1:k+1]
+    all_ok = True
+    for cand in cands:
+      for categ_type in self.categ_fields:
+        if self.dct_prods_categs[prod_id][categ_type] != self.dct_prods_categs[cand][categ_type]:
+          all_ok = False
+    if not all_ok:
+      new_embeds = self.default_retrofit(prod_ids=prod_id)
+      idxs, dists = prove_utils.neighbors_by_idx(
+          idx=prod_id, 
+          embeds=new_embeds, 
+          k=10)
+      cands = idxs[1:k+1]
+    
+    if as_dataframe:
+      res = self._items_to_df(cands)
+    else:
+      res = cands
+    if verbose:
+      self.P("Item top_k={} replacement for item {} - '{}':\n{}".format(          
+          k, prod_id, self.dct_i2n[prod_id],
+          textwrap.indent(str(res), "    ")))
+    return res
+      
+      
+      
+  
+
+
+  #############################################################################
+  #############################################################################
+  #############################################################################
+
+  
+  def default_retrofit(self, prod_ids=None):
+    return self.get_retrofitted_embeds(
+        prod_ids=prod_ids,
+        method='v4_th',
+        dist='l1',
+        skip_negative=False,
+        batch_size=256,
+        verbose=False,
+        )
 
   
   
@@ -445,7 +520,7 @@ class EmbedsEngine(LummetryObject):
             elif neg_id not in _dct_neg[nn]:
               _dct_neg[nn].append(neg_id)
             
-    method_name = '_get_retrofitted_embeds_' + method    
+    method_name = '_retrofit_embeds_' + method    
     func = getattr(self, method_name)
     self.P("  Method:      {}".format(func.__name__))
     self.P("  Pos edges: {}".format(len(_dct)))
@@ -458,7 +533,7 @@ class EmbedsEngine(LummetryObject):
     return embeds
   
   
-  def _get_retrofitted_embeds_v1(self, dct_edges, **kwargs):
+  def _retrofit_embeds_v0(self, dct_edges, **kwargs):
     embeds = self._retrofit_faruqui_fast(
         np_X=self.embeds,
         dct_edges=dct_edges,
@@ -595,22 +670,6 @@ class EmbedsEngine(LummetryObject):
         self._measure_changes(np_new_embed, np_similar_vectors)))
     return np_new_embed
   
-  
-  def cold_start_item(self, dct_categs, need_items=None, similar_items=None):
-    """
-    Steps:
-      1. USER: categ1, categ2...
-      2. SYS: embed
-      3. 
-      
-      
-      1. USER: categ1, categ2, interests categ
-    """
-    pass
-  
-  def get_product_replacement(self, prod_id):
-    pass
-  
 
   def _prepare_retrofit_data(self, dct_positive, 
                              dct_negative=None, 
@@ -683,215 +742,8 @@ class EmbedsEngine(LummetryObject):
       self.P("    Dataset: {}".format(np_all_data.shape))
       return np_all_data
       
-      
   
-  def _get_retrofitted_embeds_v2_tf(self, 
-                                    dct_edges, 
-                                    dct_negative=None,
-                                    eager=False, 
-                                    use_fit=False,
-                                    epochs=99, 
-                                    batch_size=16384,
-                                    gpu_optim=True,
-                                    lr=0.1,
-                                    patience=2,
-                                    tol=1e-1,
-                                    **kwargs):
-    """
-    this method implements a similar approach to Dingwell et al
-    """
-    self.P("Starting `_get_retrofitted_embeds_v2_tf`...")
-    import tensorflow as tf
-
-    
-    vocab_size = self.embeds.shape[0]
-    embedding_dim = self.embeds.shape[1]
-
-    data = self._prepare_retrofit_data(
-        dct_positive=dct_edges,
-        dct_negative=dct_negative,
-        split=False,
-        )
-    
-    self.P("  Preparing model...")
-    
-    nr_inputs = 4
-    assert data.shape[-1] == nr_inputs
-
-    embeds_old = tf.keras.layers.Embedding(
-        vocab_size, embedding_dim, 
-        embeddings_initializer=tf.keras.initializers.Constant(self.embeds),
-        trainable=False,
-        dtype=tf.float32,
-        name='org_emb')
-    embeds_new = tf.keras.layers.Embedding(
-        vocab_size, embedding_dim, 
-        embeddings_initializer=tf.keras.initializers.Constant(self.embeds),
-        trainable=True,
-        dtype=tf.float32,
-        name='new_emb')
-    
-    src_sel = tf.keras.layers.Lambda(lambda x: x[:,0], name='inp_src')
-    dst_sel = tf.keras.layers.Lambda(lambda x: x[:,1], name='inp_dst')
-    wgh_p_sel = tf.keras.layers.Lambda(lambda x: x[:,2], name='inp_pres_weight')
-    wgh_r_sel = tf.keras.layers.Lambda(lambda x: x[:,3], name='inp_rela_weight')
-    
-    p_diff = tf.keras.layers.Subtract(name='preserve_diff')
-    r_diff = tf.keras.layers.Subtract(name='relation_diff')
-    
-    p_norm = tf.keras.layers.Lambda(lambda x: tf.reduce_sum(tf.pow(x, 2), axis=1), name='preserve_dst')
-    r_norm = tf.keras.layers.Lambda(lambda x: tf.reduce_sum(tf.pow(x, 2), axis=1), name='relation_dst')
-    
-    p_weighting = tf.keras.layers.Multiply(name='preserve_weight')
-    r_weighting = tf.keras.layers.Multiply(name='relation_weight')
-    
-    final_add = tf.keras.layers.Add(name='preserve_and_relation')
-    
-        
-    def identity_loss(y_true, y_pred):
-      return tf.math.maximum(0.0, tf.reduce_sum(y_pred))
-      
-       
-    tf_input = tf.keras.layers.Input((nr_inputs,))
-    tf_src = src_sel(tf_input)
-    tf_dst = dst_sel(tf_input)
-    tf_weight_p = wgh_p_sel(tf_input)
-    tf_weight_r = wgh_r_sel(tf_input)
-    
-    tf_src_orig = embeds_old(tf_src)
-    tf_src_new = embeds_new(tf_src)
-    tf_dst_new = embeds_new(tf_dst)
-    
-    tf_preserve_diff = p_diff([tf_src_orig, tf_src_new])
-    tf_relation_diff = r_diff([tf_src_new, tf_dst_new])
-    
-    tf_preserve_nw = p_norm(tf_preserve_diff)
-    tf_relate_nw = r_norm(tf_relation_diff)
-    
-    tf_preserve = p_weighting([tf_preserve_nw, tf_weight_p])
-    tf_relate = r_weighting([tf_relate_nw, tf_weight_r])
-    
-    tf_retro_loss_batch = final_add([tf_preserve, tf_relate])
-    
-    model = tf.keras.models.Model(tf_input, tf_retro_loss_batch)
-    self.P("  Training model for {} epochs, batch={}, lr={:.1e}, tol={:.1e}".format(
-        epochs, batch_size, lr, tol))
-    opt = tf.keras.optimizers.SGD(lr=lr)
-    losses = []
-    best_loss = np.inf
-    fails = 0
-    last_embeds = self.embeds
-    best_embeds = None
-    if eager:
-      def _convert(idx_slices):
-        return tf.scatter_nd(tf.expand_dims(idx_slices.indices, 1),
-                         idx_slices.values, idx_slices.dense_shape)
-      self.P("    Starting eager training loop")
-      ds = tf.data.Dataset.from_tensor_slices(data)
-      n_batches = data.shape[0] // batch_size + 1
-      ds = ds.batch(batch_size).prefetch(1)
-      for epoch in range(1, epochs+1):
-        epoch_losses = []
-        for i, tf_batch in enumerate(ds):
-          with tf.GradientTape() as tape:
-            tf_s = src_sel(tf_batch)
-            tf_d = dst_sel(tf_batch)
-            tf_w_p = wgh_p_sel(tf_batch)
-            tf_w_r = wgh_r_sel(tf_batch)
-            
-            tf_s_orig = embeds_old(tf_s)
-            tf_s_new = embeds_new(tf_s)
-            tf_d_new = embeds_new(tf_d)
-            
-            tf_p_diff = p_diff([tf_s_orig, tf_s_new])
-            tf_r_diff = r_diff([tf_s_new, tf_d_new])    
-            
-            tf_p_nw = p_norm(tf_p_diff)
-            tf_r_nw = r_norm(tf_r_diff)
-            
-            tf_p = p_weighting([tf_p_nw, tf_w_p]) 
-            tf_r = r_weighting([tf_r_nw, tf_w_r]) 
-            
-            tf_retro = final_add([tf_p, tf_r])
-            
-            tf_loss = identity_loss(None, tf_retro)
-          epoch_losses.append(tf_loss.numpy())
-          grads = tape.gradient(tf_loss, model.trainable_weights)
-          test = _convert(grads[0])
-          opt.apply_gradients(zip(grads, model.trainable_weights))
-          self.log.Pr("    Epoch {:03d} - {:.1f}% - loss: {:.2f}".format(
-              epoch, i / n_batches * 100, np.mean(epoch_losses)))
-        epoch_loss = np.mean(epoch_losses)
-        losses.append(epoch_loss)          
-        self.P("    Epoch {:03d} - loss: {:.2f}".format(epoch, epoch_loss))
-        if epoch_loss < best_loss:
-          best_loss = epoch_loss
-          fails = 0
-        else:
-          fails += 1
-        if fails >= patience or epoch_loss <= tol:
-          self.P("    Stopping traing at epoch {}".format(epoch))
-          break          
-      self.P("  End eager dubug training")
-      # end EAGER DEBUG training        
-    else:              
-      model.compile(optimizer=opt, loss=identity_loss)      
-      tf.keras.utils.plot_model(
-          model,
-          to_file=os.path.join(self.log.get_models_folder(),'emb_retr_v2_tf.png'),
-          show_shapes=True,
-          show_layer_names=True,
-          expand_nested=True,
-          )
-      if use_fit:
-        model.fit(x=data, y=data, epochs=epochs, batch_size=batch_size)
-        best_embeds = embeds_new.get_weights()[0]  
-      else:
-        ds = tf.data.Dataset.from_tensor_slices(data)
-        n_batches = data.shape[0] // batch_size + 1
-        ds = ds.batch(batch_size)
-        if gpu_optim:
-          ds = ds.apply(tf.data.experimental.copy_to_device("/gpu:0"))
-          ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
-          # ds = ds.
-        else:
-          ds = ds.prefetch(1)
-        for epoch in range(1, epochs+1):
-          epoch_losses = []
-          t1 = time()
-          b_shape = None          
-          for i, tf_batch in enumerate(ds):
-            if i == 0:
-              b_shape = tf_batch.shape
-            loss = model.train_on_batch(x=tf_batch, y=tf_batch)
-            epoch_losses.append(loss)            
-            self.log.Pr("    Epoch {:02d} - {:.1f}% - loss: {:.2f}".format(
-                epoch, i / n_batches * 100, np.mean(epoch_losses)))
-          t2 = time()
-          epoch_loss = np.mean(epoch_losses)
-          losses.append(epoch_loss)
-          new_embeds = embeds_new.get_weights()[0]          
-          if epoch_loss < best_loss:
-            best_embeds = new_embeds
-            best_loss = epoch_loss
-            fails = 0
-          else:
-            fails += 1
-          diff = self._measure_changes(last_embeds, new_embeds)
-          self.P("    Epoch {:02d}/{} - loss: {:.2f}, change:{:.3f}, time: {:.1f}s, batch: {}, fails: {}".format(
-              epoch, epochs, epoch_loss, diff, t2 - t1, b_shape, fails))
-          if fails >= patience or diff <= tol:
-            self.P("    Stopping traing at epoch {}".format(epoch))
-            break
-          last_embeds = new_embeds
-        # end batch
-      # end epoch
-    # end else eager
-    
-    return best_embeds
-  
-  
-  def _get_retrofitted_embeds_v5_tf(self, 
+  def _retrofit_embeds_v5_tf(self, 
                                     dct_edges, 
                                     dct_negative=None,
                                     eager=False, 
@@ -903,6 +755,7 @@ class EmbedsEngine(LummetryObject):
                                     patience=2,
                                     tol=1e-3,
                                     dist='l1',
+                                    fixed_weights=None,
                                     **kwargs):
     """
     this method implements a similar approach to Dingwell et al
@@ -918,6 +771,7 @@ class EmbedsEngine(LummetryObject):
     data = self._prepare_retrofit_data(
         dct_positive=dct_edges,
         dct_negative=dct_negative,
+        fixed_weights=fixed_weights,
         pad_id=pad_id,
         split=True,
         )
@@ -988,7 +842,7 @@ class EmbedsEngine(LummetryObject):
       lyr_r_dist = lyr_r_l2
       lyr_n_dist = lyr_n_l2
     elif dist == 'cos':
-      lyr_p_dist = lyr_p_l1
+      lyr_p_dist = lyr_p_l2
       lyr_r_dist = lyr_r_cos
       lyr_n_dist = lyr_n_cos
     
@@ -1008,9 +862,9 @@ class EmbedsEngine(LummetryObject):
     
     tf_src_id = tf.keras.layers.Input((1,), name='item_id')
     tf_rel_id = tf.keras.layers.Input((None,), name='related_ids')
-    tf_rel_w = tf.keras.layers.Input((1,), name='related_weights')
+    tf_rel_w = tf.keras.layers.Input((1,), name='related_weights', dtype='float32')
     tf_neg_id = tf.keras.layers.Input((None,), name='negative_ids')
-    tf_neg_w = tf.keras.layers.Input((1,), name='negative_weights')
+    tf_neg_w = tf.keras.layers.Input((1,), name='negative_weights', dtype='float32')
     
     inputs = [tf_src_id, tf_rel_id, tf_rel_w, tf_neg_id, tf_neg_w]
         
@@ -1041,10 +895,11 @@ class EmbedsEngine(LummetryObject):
     
     model = tf.keras.models.Model(inputs, tf_retro_loss_batch)
     opt = tf.keras.optimizers.SGD(lr=lr)
-    model.compile(optimizer=opt, loss=identity_loss)      
+    model.compile(optimizer=opt, loss=identity_loss)  
     tf.keras.utils.plot_model(
         model,
-        to_file=os.path.join(self.log.get_models_folder(),'emb_retr_v5_tf.png'),
+        to_file=os.path.join(self.log.get_models_folder(),'rmodel_v5_{}_tf.png'.format(
+            dist)),
         show_shapes=True,
         show_layer_names=True,
         expand_nested=True,
@@ -1060,6 +915,8 @@ class EmbedsEngine(LummetryObject):
     data_np = [np.array(x) for x in data]
     data_np_reshape = []
     for np_data in data_np:
+      if np_data.dtype == np.float64:
+        np_data = np_data.astype('float32')
       if len(np_data.shape) == 1:
         data_np_reshape.append(np_data.reshape(-1,1))
       else:
@@ -1073,8 +930,10 @@ class EmbedsEngine(LummetryObject):
       ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
     else:
       ds = ds.prefetch(1)
-    self.P("  Training model for {} epochs, batch={}, lr={:.1e}, tol={:.1e}, dist={}, neg_margin={}".format(
-        epochs, batch_size, lr, tol, dist, negative_margin))
+    self.P("  Training tf model for {} epochs, batch={}, lr={:.1e}, tol={:.1e}, dist={}, fix_w={}, neg_m={}".format(
+        epochs, batch_size, lr, tol, 
+        dist, fixed_weights,
+        negative_margin))
     if eager:
       for epoch in range(1, epochs+1):
         epoch_losses = []
@@ -1165,7 +1024,7 @@ class EmbedsEngine(LummetryObject):
     
   
   
-  def _get_retrofitted_embeds_v4_th(self, 
+  def _retrofit_embeds_v4_th(self, 
                                     dct_edges, 
                                     dct_negative=None,
                                     eager=False, 
@@ -1237,10 +1096,10 @@ class EmbedsEngine(LummetryObject):
         negative_margin = 1
     else:
       negative_margin = 0
-    self.P("  Training model for {} epochs, batch={}, lr={:.1e}, tol={:.1e}{}, dist={}, fixed_weights={}".format(
+    self.P("  Training th model for {} epochs, batch={}, lr={:.1e}, tol={:.1e}, dist={}, fix_w={}, neg_m={}".format(
         epochs, batch_size, lr, tol, 
-        ", negative margin: {}".format(negative_margin) if negative_margin>0 else "",
-        dist, fixed_weights))
+        dist, fixed_weights,
+        negative_margin))
     for epoch in range(1, epochs + 1):
       epoch_losses = []
       p_losses = []

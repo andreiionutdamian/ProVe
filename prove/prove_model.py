@@ -7,16 +7,10 @@ Created on Tue Apr 14 09:51:07 2020
 
 from scipy import sparse
 import numpy as np
-import pandas as pd
 from time import time
-from itertools import  permutations
 import textwrap
 import os
-import io
-from datetime import datetime as dt
-from collections import OrderedDict, deque
 import random
-import pickle
 
 try:
     import tensorflow.compat.v1 as tf
@@ -33,13 +27,15 @@ __PROVE_VER__  = '0.2.0.2'
 ###############################################################################
 ###############################################################################
 
-class ProVe():
+from libraries_pub.generic_obj import LummetryObject
+
+class ProVe(LummetryObject):
   def __init__(self, 
                log,
                default_embeds_file=None,
                name='prove_embs',
                random_seed=None,
-               DEBUG=False
+               **kwargs
                ):    
     self.embeds = None
     self.graph = None
@@ -47,17 +43,24 @@ class ProVe():
     self.best_score = None
     self._display_every_epochs = 1
     self.version = __PROVE_VER__
-    self.DEBUG = DEBUG
     self.log = log
     self._P("v{} initializing...".format(self.version))
     self.name = name
     self.default_embeds_file = default_embeds_file
     self.errors = []
-    if random_seed is not None:
-      self.random_seed = random_seed
+    super().__init__()
+    self.random_seed = random_seed
+    return
+  
+  
+  def starup(self):
+    super().startup()
+    if self.random_seed is not None:
       self._set_random_seed()
     self._maybe_load()
     return
+    
+    
   
   def _Pr(self, s, itr):
     if (itr % self._display_every_epochs) != 0:
@@ -129,7 +132,6 @@ class ProVe():
           mu=0.0, # set to 0.1 as per Dingwall et al when using init embeds
           alpha=0.75, # as per Pennington et al.
           lr=0.05, # as per Dingwall et al
-          save_folder='',
           save_epochs=100,
           max_fail_saves=5,
           save_opt_hist=True,
@@ -139,7 +141,7 @@ class ProVe():
           tb_log_dir=None,
           tb_log_subdir=None,
           interactive_session=False,
-          validation_data=None
+          validation_data=None # early stopping
           ):
     
     
@@ -151,7 +153,7 @@ class ProVe():
       
     self._epochs = epochs
     self._save_epochs = save_epochs
-    self._save_folder = save_folder
+    self._save_folder = self.log.get_models_folder()
     self._save_opt_hist = save_opt_hist
     self._max_cooccure = max_cooccure
     self._tol = tol

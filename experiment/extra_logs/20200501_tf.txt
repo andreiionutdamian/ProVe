@@ -1,0 +1,62 @@
+Training model for 99 epochs, batch=256, lr=5.0e-02, tol=1.0e-03, dist=l1, neg_margin=128
+
+  Distance from positive 11418:  0.238
+  Distance from negative 9745:   0.740
+        ID  DIST                            NAME      H1                H2
+  0  12071 0.000  CD / DAVID BOWIE / BLACKSTAR (  MUZICA  CD International
+  1   6275 0.167  CD / LANA DEL REY / LUST FOR L  MUZICA  CD International
+  2  12238 0.168  CD / RED HOT CHILI PEPPERS / T  MUZICA  CD International
+  3   1175 0.186  CD / QUEEN / GREATEST HITS (20  MUZICA  CD International
+  4   4865 0.186  CD / COLDPLAY / A HEAD FULL OF  MUZICA  CD International
+  5  11406 0.186  CD / FLORENCE + THE MACHINE /   MUZICA  CD International
+  6   1408 0.187  CD / QUEEN / THE PLATINUM COLL  MUZICA  CD International
+  7   9991 0.188  CD / LED ZEPPELIN / REMASTERS   MUZICA  CD International
+  8  12862 0.189  CD / DREAM THEATER / THE TRIPL  MUZICA  CD International
+  9   4416 0.191  CD / COLDPLAY / 4 CD CATALOGUE  MUZICA  CD International
+
+Training model for 99 epochs, batch=256, lr=5.0e-02, tol=1.0e-03, dist=l2, neg_margin=128
+
+  Distance from positive 11418:  0.040
+  Distance from negative 9745:   0.752
+        ID  DIST                            NAME      H1                H2
+  0  12071 0.000  CD / DAVID BOWIE / BLACKSTAR (  MUZICA  CD International
+  1   4416 0.020  CD / COLDPLAY / 4 CD CATALOGUE  MUZICA  CD International
+  2  12238 0.021  CD / RED HOT CHILI PEPPERS / T  MUZICA  CD International
+  3   7004 0.021  CD / PINK MARTINI / JE DIS OUI  MUZICA  CD International
+  4  11625 0.021  CD / V/A / ULTIMATE ROCK (2015  MUZICA  CD International
+  5  12225 0.022  CD / FRANK SINATRA / NOTHING B  MUZICA  CD International
+  6   1408 0.023  CD / QUEEN / THE PLATINUM COLL  MUZICA  CD International
+  7   8366 0.024  CD / ANGELA GHEORGHIU / ETERNA  MUZICA  CD International
+  8   6275 0.024  CD / LANA DEL REY / LUST FOR L  MUZICA  CD International
+  9   4772 0.025  CD / MILES DAVIS / KIND OF BLU  MUZICA  CD International
+
+Training model for 99 epochs, batch=256, lr=5.0e-02, tol=1.0e-03, dist=cos, neg_margin=1
+
+  Distance from positive 11418:  0.639
+  Distance from negative 9745:   0.701
+  0  12071  0.00  CD / DAVID BOWIE / BLACKSTAR (           MUZICA      CD International
+  1   4416  0.63  CD / COLDPLAY / 4 CD CATALOGUE           MUZICA      CD International
+  2  11418  0.64  CD / DAVID BOWIE / BEST OF BOW           MUZICA      CD International
+  3   4865  0.66  CD / COLDPLAY / A HEAD FULL OF           MUZICA      CD International
+  4   8403  0.69  1001 DE CARTI DE CITIT INTR-O         CARTE ROM  POEZIE / TEATRU / ST
+  5   7933  0.69     CUVINTE INCRUCISATE/ IQ FUN        CARTE ROM    CARTI PENTRU COPII
+  6   4263  0.69  COUNTRY MERRY CHRISTMAS / 3 M      PAPETARIE AA              Giftware
+  7   9745  0.70  MASINI DIE-CAST 7.5cm III ASST          JUCARII               JUCARII
+  8   4400  0.70  CARTEA SARUTURILOR / IV CEL NA        CARTE ROM  POEZIE / TEATRU / ST
+  9   8392  0.70                13.2X2.5CM PLATE  ACCESORII GASTR  Accesorii servit mas
+
+Training model for 99 epochs, batch=256, lr=5.0e-02, tol=1.0e-03, dist=cos, neg_margin=1
+
+  Distance from positive 11418:  0.010
+  Distance from negative 9745:   0.758
+        ID  DIST                            NAME               H1                    H2
+  0  12071  0.00  CD / DAVID BOWIE / BLACKSTAR (  MUZICA  CD International
+  1   4865  0.01  CD / COLDPLAY / A HEAD FULL OF  MUZICA  CD International
+  2   4416  0.01  CD / COLDPLAY / 4 CD CATALOGUE  MUZICA  CD International
+  3   8366  0.01  CD / ANGELA GHEORGHIU / ETERNA  MUZICA  CD International
+  4   7004  0.01  CD / PINK MARTINI / JE DIS OUI  MUZICA  CD International
+  5   6275  0.01  CD / LANA DEL REY / LUST FOR L  MUZICA  CD International
+  6   5702  0.01  CD / DEPECHE MODE / SPIRIT (20  MUZICA  CD International
+  7   4772  0.01  CD / MILES DAVIS / KIND OF BLU  MUZICA  CD International
+  8   3279  0.01  CD / ED SHEERAN / DIVIDE ÷ (De  MUZICA  CD International
+  9   1408  0.01  CD / QUEEN / THE PLATINUM COLL  MUZICA  CD International

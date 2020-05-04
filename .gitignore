@@ -14,3 +14,5 @@ exp_data/obfuscated_keys.txt
 prove/__pycache__/
 
 experiment/_data/obfuscated_keys.txt
+
+experiment/_logs/
