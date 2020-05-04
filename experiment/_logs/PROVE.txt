@@ -1,3 +1,0 @@
-{
-    "CURRENT_LOG": ".\\experiment\\_logs\\20200501_141936_PROVE_001_log.txt"
-}
