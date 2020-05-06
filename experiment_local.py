@@ -278,10 +278,12 @@ if FULL_RETROFIT:
     batch_size = 256
     eager = False
   options = [
-      {'method':'v4_th', 'batch_size': batch_size, 'dist':'l1'},
-  #    {'method':'v4_th', 'batch_size': batch_size, 'dist':'l2'},
-  #    {'method':'v4_th', 'batch_size': batch_size, 'dist':'cos', 'fixed_weights': None},
-  #    {'method':'v4_th', 'batch_size': batch_size, 'dist':'cos', 'fixed_weights': 1},
+      {'method':'v4_th', 'batch_size': batch_size, 'dist':'l1', 'fixed_weights': None},
+      {'method':'v4_th', 'batch_size': batch_size, 'dist':'l1', 'fixed_weights': 1},
+      {'method':'v4_th', 'batch_size': batch_size, 'dist':'l2', 'fixed_weights': None},
+      {'method':'v4_th', 'batch_size': batch_size, 'dist':'l2', 'fixed_weights': 1},
+      {'method':'v4_th', 'batch_size': batch_size, 'dist':'cos', 'fixed_weights': None},
+      {'method':'v4_th', 'batch_size': batch_size, 'dist':'cos', 'fixed_weights': 1},
   
   #    {'method':'v5_tf', 'batch_size': batch_size, 'dist':'l1'},
   #    {'method':'v5_tf', 'batch_size': batch_size, 'dist':'l2'},
@@ -299,13 +301,14 @@ if FULL_RETROFIT:
     log.P("{}".format(setting))
     log.P("================================================================================================")
     new_embeds = prod_eng.get_retrofitted_embeds(
-        prod_ids=exp_id, 
-        lr=0.02,
+        item_ids=exp_id, 
+        lr=0.001,
   #      dct_negative={exp_id:[neg_id]},
         skip_negative=False,
         DEBUG=DEBUG,
         eager=eager,
-        epochs=99,
+        epochs=20,
+        verbose=False,
         **setting,
         )
     
@@ -317,25 +320,26 @@ if FULL_RETROFIT:
     prod_eng.analize_item(exp_id, positive_id=pos_id, negative_id=neg_id, embeds=new_embeds,
                           embeds_name=embeds_name+'_RETRO')   
     d = prod_eng.get_similar_items(exp_id, embeds=new_embeds, filtered=False, show=print_df,
-                               name='Non-filtered neighbors of {} using retrofitted {} model'.format(
+                               name='Non-filtered neighbors of {} using RETROFITTED {} model'.format(
                                    exp_id, embeds_name))    
     log.save_dataframe(d, 'neighbors', to_data=False)
+else:
+    
+  k = 3
+  _ = prod_eng.get_item_replacement(
+      prod_id=exp_id,
+      k=k,
+      as_dataframe=True,
+      verbose=True
+      )  
   
-k = 3
-_ = prod_eng.get_item_replacement(
-    prod_id=exp_id,
-    k=k,
-    as_dataframe=True,
-    verbose=True
-    )  
-
-k = 5
-_ = prod_eng.get_item_replacement(
-    prod_id=exp_id,
-    k=k,
-    as_dataframe=True,
-    verbose=True
-    )  
+  k = 5
+  _ = prod_eng.get_item_replacement(
+      prod_id=exp_id,
+      k=k,
+      as_dataframe=True,
+      verbose=True
+      )  
   
   
 
@@ -362,3 +366,5 @@ _ = prod_eng.get_item_replacement(
 #prod_eng.get_similar_items(exp_id, filtered=True, show=print_df, embeds=embeds_10ke,
 #                           name='Filtered neighbors of {} using {} model'.format(
 #                               exp_id, EMB128_10k_FN))    
+
+log.show_timers()

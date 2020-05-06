@@ -210,8 +210,8 @@ class EmbedsEngine(LummetryObject):
       for categ_id in self.df_meta[categ_field].unique():
         dct_categ_prods[categ_field][categ_id] = self.df_meta[
             self.df_meta[categ_field] == categ_id][self.id_fld].unique().tolist()
-        for prod_id in dct_categ_prods[categ_field][categ_id]:
-          dct_prods_categs[prod_id][categ_field] = categ_id
+        for item_id in dct_categ_prods[categ_field][categ_id]:
+          dct_prods_categs[item_id][categ_field] = categ_id
     self.dct_categ_prods = dct_categ_prods
     self.dct_prods_categs = dct_prods_categs
     return
@@ -327,20 +327,33 @@ class EmbedsEngine(LummetryObject):
     if embeds is None:
       embeds = self.embeds      
     self.log.Pr("Performing analysis of item {}...".format(item_id))
+    self.log.start_timer('analize_item_info')
     d_i = self.get_item_info(item_id)
-#    d_p = self.get_item_info(positive_id)
-#    d_n = self.get_item_info(negative_id)
+    self.log.stop_timer('analize_item_info')
+    self.log.start_timer('analize_item_neibs')
     idxs, dists = prove_utils.neighbors_by_idx(item_id, embeds, k=None)
-    p_dist = dists[np.where(idxs==positive_id)[0][0]]
-    n_dist = dists[np.where(idxs==negative_id)[0][0]]
-    df_f = self.get_similar_items(item_id, embeds, filtered=True)
-    df_n = self.get_similar_items(item_id, embeds, filtered=False)
+    self.log.stop_timer('analize_item_neibs')
+    self.log.start_timer('analize_item_dists')
+    p_rank = np.where(idxs==positive_id)[0][0]
+    n_rank = np.where(idxs==negative_id)[0][0]
+    p_dist = dists[p_rank]
+    n_dist = dists[n_rank]
+    self.log.stop_timer('analize_item_dists')
+    if show_df:
+      self.log.start_timer('analize_item_similar')
+      df_f = self.get_similar_items(item_id, embeds, filtered=True)
+      df_n = self.get_similar_items(item_id, embeds, filtered=False)
+      self.log.stop_timer('analize_item_similar')
     self.P("Analysis of {}: '{}'  {}".format(
         item_id, d_i['NAME'],
         "using model {}".format(embeds_name) if embeds_name else '')
         )
-    self.P("  Distance from positive {:<7} {:.3f}".format(str(positive_id)+':', p_dist))
-    self.P("  Distance from negative {:<7} {:.3f}".format(str(negative_id)+':', n_dist))
+    self.P("  Rank/dist from positive {:<7} {:>5}/{:.3f}".format(
+        str(positive_id)+':', 
+        p_rank, p_dist))
+    self.P("  Rank/dist from negative {:<7} {:>5}/{:.3f}".format(
+        str(negative_id)+':', 
+        n_rank, n_dist))
     if show_df:
       self.P("  Non-filtered neighbors:")
       self.P(textwrap.indent(str(df_n), "    "))
@@ -408,7 +421,31 @@ class EmbedsEngine(LummetryObject):
   #############################################################################
   
   
-  def cold_start_item(self, dct_categs, need_items=None, similar_items=None):
+  def cold_start_item(self, name, dct_categs, need_items=None, similar_items=None):
+    item_id = self.df_meta[self.id_fld].max() + 1
+    record = {
+        self.id_fld : item_id,
+        self.name_fld :  name,
+        }
+    for categ_field in dct_categs:
+      record[categ_field] = dct_categs[categ_field]
+    self.df_meta.append(record)
+    embed = self.cold_start_embed(
+        dct_categs=dct_categs,
+        need_items=need_items,
+        similar_items=similar_items
+        )
+    self.embeds = np.concatenate((self.embeds, embed.reshape(1,-1)))
+    self.get_similar_items(
+        item_id=item_id, 
+        filtered=False, 
+        show=True,
+        name='Non-filtered neighbors of new item {}'.format(
+            item_id))
+    return item_id
+  
+  
+  def cold_start_embed(self, dct_categs, need_items=None, similar_items=None):
     """
     Steps:
       1. USER: categ1, categ2...
@@ -418,34 +455,52 @@ class EmbedsEngine(LummetryObject):
       
       1. USER: categ1, categ2, interests categ
     """
-    pass
+    
+    idxs_from_categ = []
+    for categ_field in dct_categs:
+      categ_id = dct_categs[categ_field]
+      idxs_from_categ += self.dct_categ_prods[categ_field][categ_id]
+    embed = self.embeds[idxs_from_categ].mean(axis=0)
+    if need_items is not None:
+      assert type(need_items) in [list, np.ndarray], "`need_items` must be either list or ndarray"
+      
+      need_embeds = self.embeds[need_items]
+      embed = self._retrofit_vector_to_embeddigs(embed, need_embeds)
+    # end need_items
+    if similar_items is not None:
+      assert type(similar_items) in [list, np.ndarray], "`similar_items` must be either list or ndarray"
+      
+      similar_embeds = self.embeds[similar_items]
+      embed = self._retrofit_vector_to_embeddigs(embed, similar_embeds)
+    # end similar_items  
+    return embed
   
-  def get_item_replacement(self, prod_id, k=5, as_dataframe=False, verbose=True):    
+  def get_item_replacement(self, item_id, k=5, as_dataframe=False, verbose=True):    
     idxs, dists = prove_utils.neighbors_by_idx(
-        idx=prod_id, 
+        idx=item_id, 
         embeds=self.embeds, 
         k=10)
     cands = idxs[1:k+1]
     all_ok = True
     for cand in cands:
       for categ_type in self.categ_fields:
-        if self.dct_prods_categs[prod_id][categ_type] != self.dct_prods_categs[cand][categ_type]:
+        if self.dct_prods_categs[item_id][categ_type] != self.dct_prods_categs[cand][categ_type]:
           all_ok = False
     if not all_ok:
-      new_embeds = self.default_retrofit(prod_ids=prod_id)
+      new_embeds = self.default_retrofit(item_ids=item_id)
       idxs, dists = prove_utils.neighbors_by_idx(
-          idx=prod_id, 
+          idx=item_id, 
           embeds=new_embeds, 
           k=10)
       cands = idxs[1:k+1]
-    
+    # end need retrofit
     if as_dataframe:
       res = self._items_to_df(cands)
     else:
       res = cands
     if verbose:
       self.P("Item top_k={} replacement for item {} - '{}':\n{}".format(          
-          k, prod_id, self.dct_i2n[prod_id],
+          k, item_id, self.dct_i2n[item_id],
           textwrap.indent(str(res), "    ")))
     return res
       
@@ -459,9 +514,9 @@ class EmbedsEngine(LummetryObject):
   #############################################################################
 
   
-  def default_retrofit(self, prod_ids=None):
+  def default_retrofit(self, item_ids=None):
     return self.get_retrofitted_embeds(
-        prod_ids=prod_ids,
+        item_ids=item_ids,
         method='v4_th',
         dist='l1',
         skip_negative=False,
@@ -472,7 +527,7 @@ class EmbedsEngine(LummetryObject):
   
   
   def get_retrofitted_embeds(self, 
-                             prod_ids=None, 
+                             item_ids=None, 
                              method='v1', 
                              dct_negative=None, 
                              skip_negative=False,
@@ -480,34 +535,34 @@ class EmbedsEngine(LummetryObject):
                              **kwargs):
     self.P("")
     self.P("Performing retrofitting on {} embedding matrix...".format(self.embeds.shape))
-    self.P("  Product(s):  {}".format(prod_ids))
+    self.P("  Product(s):  {}".format(item_ids))
     self.P("  Full edges:  {}".format(full_edges))
     if dct_negative is not None:
       self.P("  Negatives:   {}".format(len(dct_negative)))
     _dct = self.dct_pos_edges
     _dct_neg = self.dct_neg_edges if not skip_negative else {}
-    if prod_ids is not None:
+    if item_ids is not None:
       _dct = {}
       _dct_neg = {}
-      if type(prod_ids) == int:
-        prod_ids = [prod_ids]
-      for prod_id in prod_ids:
-        related_prods = self.dct_pos_edges[prod_id]
-        _dct[prod_id] = related_prods
+      if type(item_ids) == int:
+        item_ids = [item_ids]
+      for item_id in item_ids:
+        related_prods = self.dct_pos_edges[item_id]
+        _dct[item_id] = related_prods
         if full_edges:
           for related_id in related_prods:
             if related_id not in _dct:
               _dct[related_id] = self.dct_pos_edges[related_id]
-            elif prod_id not in _dct[related_id]:
-              _dct[related_id].append(prod_id)
+            elif item_id not in _dct[related_id]:
+              _dct[related_id].append(item_id)
         if dct_negative is None and not skip_negative: 
           # unless we give specific negative dict or no negative
-          negative_prods = self.dct_neg_edges[prod_id]
-          _dct_neg[prod_id] = negative_prods
+          negative_prods = self.dct_neg_edges[item_id]
+          _dct_neg[item_id] = negative_prods
           if full_edges:
             for neg_id in negative_prods:
               if neg_id not in _dct_neg:
-                _dct_neg[neg_id] = [prod_id]
+                _dct_neg[neg_id] = [item_id]
             
     if dct_negative is not None and not skip_negative:
       _dct_neg = dct_negative.copy()
@@ -529,7 +584,7 @@ class EmbedsEngine(LummetryObject):
     t1 = time()
     embeds = func(dct_edges=_dct, dct_negative=_dct_neg, **kwargs)
     t2 = time()
-    self.P("Retrofit with '{}' took {:.1f}s".format(func.__name__, t2-t1))
+    self.P("Retrofit with '{}' took {:.1f}s\t\t\t\t\t\t\t".format(func.__name__, t2-t1))
     return embeds
   
   
@@ -930,10 +985,11 @@ class EmbedsEngine(LummetryObject):
       ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
     else:
       ds = ds.prefetch(1)
-    self.P("  Training tf model for {} epochs, batch={}, lr={:.1e}, tol={:.1e}, dist={}, fix_w={}, neg_m={}".format(
-        epochs, batch_size, lr, tol, 
+    self.P("  Training tf model ep={}, pos_batch={}, lr={:.1e}, tol={:.1e}, dist={}, fix_w={}, neg_m={}".format(
+        epochs, tuple(tensors[1].shape), lr, tol, 
         dist, fixed_weights,
         negative_margin))
+    t_start = time()
     if eager:
       for epoch in range(1, epochs+1):
         epoch_losses = []
@@ -991,10 +1047,7 @@ class EmbedsEngine(LummetryObject):
       for epoch in range(1, epochs+1):
         epoch_losses = []
         t1 = time()
-        b_shape = None          
         for i, batch in enumerate(ds):
-          if i == 0:
-            b_shape = batch[0].shape[0]
 #          loss = model.train_on_batch(x=batch, y=batch[0])
           loss = _train_on_batch(batch)
           epoch_losses.append(round(loss.numpy(),2))
@@ -1011,12 +1064,19 @@ class EmbedsEngine(LummetryObject):
         else:
           fails += 1
         diff = self._measure_changes(last_embeds, new_embeds)
-        self.P("    Epoch {:02d}/{} - loss: {:.2f}, change:{:.3f}, time: {:.1f}s, batch: {}, fails: {}".format(
-            epoch, epochs, epoch_loss, diff, t2 - t1, b_shape, fails))
+        self.P("    Epoch {:02d}/{} - loss: {:.2f}, change:{:.3f}, time: {:.1f}s, fails: {}".format(
+            epoch, epochs, epoch_loss, diff, t2 - t1,  fails))
         if fails >= patience or diff <= tol:
-          self.P("    Stopping traing at epoch {}".format(epoch))
           break
         last_embeds = new_embeds
+        
+    train_time = time() - t_start
+    if epoch < epochs:
+      self.P("  Training stopped at epoch {}/{} - {:.1f}s\t\t\t\t\t\t\t".format(
+          epoch, epochs, train_time))
+    else:
+      self.P("  Training done in {} epochs - {:.1f}s\t\t\t\t\t\t\t".format(
+          epoch, train_time))
     
     return best_embeds
   
@@ -1096,10 +1156,11 @@ class EmbedsEngine(LummetryObject):
         negative_margin = 1
     else:
       negative_margin = 0
-    self.P("  Training th model for {} epochs, batch={}, lr={:.1e}, tol={:.1e}, dist={}, fix_w={}, neg_m={}".format(
-        epochs, batch_size, lr, tol, 
+    self.P("  Training th ep={}, pos_batch={}, lr={:.1e}, tol={:.1e}, dist={}, fix_w={}, neg_m={}".format(
+        epochs, tuple(tensors[1].shape), lr, tol, 
         dist, fixed_weights,
         negative_margin))
+    t_start = time()
     for epoch in range(1, epochs + 1):
       epoch_losses = []
       p_losses = []
@@ -1108,8 +1169,6 @@ class EmbedsEngine(LummetryObject):
       t1 = time()
       for i, batch in enumerate(dl):
         th_ids, th_pos, th_pos_w, th_neg, th_neg_w = batch
-        if i == 0:
-          b_shape = th_pos.shape
         th_pos_w = th_pos_w.unsqueeze(-1)
         th_neg_w = th_neg_w.unsqueeze(-1)
         
@@ -1156,8 +1215,8 @@ class EmbedsEngine(LummetryObject):
         th_neg_nm_d = th.clamp(negative_margin - th_neg_nm, min=0)
         th_neg_mask = (th_neg != pad_id).float()
         th_neg_masked = th_neg_mask * th_neg_nm_d        
-        th_neg = th_neg_masked * th_neg_w
-        th_neg_loss = th_neg.sum(-1, keepdims=True)
+        th_neg_weighted = th_neg_masked * th_neg_w
+        th_neg_loss = th_neg_weighted.sum(-1, keepdims=True)
         
 #        th_temp = th_preserve_loss + th_relate_loss +  th_neg_loss
         
@@ -1195,17 +1254,23 @@ class EmbedsEngine(LummetryObject):
         fails += 1
       diff = self._measure_changes(last_embeds, new_embeds)
       if verbose:
-        self.P("    Epoch {:02d}/{} - loss: {:.2f} (P/R/N: {:.2f}/{:.2f}/{:.2f}), change:{:.3f}, time: {:.1f}s, batch: {}, fails: {}".format(
+        self.P("    Epoch {:02d}/{} - loss: {:.2f} (P/R/N: {:.2f}/{:.2f}/{:.2f}), change:{:.3f}, time: {:.1f}s, fails: {}".format(
             epoch, epochs, 
             epoch_loss, p_loss, r_loss, n_loss,
-            diff, t2 - t1, b_shape[0], fails))
+            diff, t2 - t1, fails))
       else:
         print(".", end='', flush=True)
       if fails >= patience or diff <= tol:
-        self.P("    Stopping traing at epoch {}".format(epoch))
         break
       last_embeds = new_embeds
     # end epoch
+    train_time = time() - t_start
+    if epoch < epochs:
+      self.P("  Training stopped at epoch {}/{} - {:.1f}s\t\t\t\t\t\t\t".format(
+          epoch, epochs, train_time))
+    else:
+      self.P("  Training done in {} epochs - {:.1f}s\t\t\t\t\t\t\t".format(
+          epoch, train_time))
     if th.cuda.is_available():
       th.cuda.empty_cache()    
     return best_embeds
