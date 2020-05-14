@@ -8,6 +8,7 @@ Created on Tue Apr  7 09:29:46 2020
 import numpy as np
 import pandas as pd
 
+from collections import OrderedDict
 import matplotlib.pyplot as plt
 print_df = True
 
@@ -272,62 +273,136 @@ if FULL_RETROFIT:
   #
   DEBUG = False
   if DEBUG:
-    batch_size = 32 
+    batch_size = 16 
     eager = True
   else:
-    batch_size = 256
+    batch_size = 64 #256
     eager = False
-  options = [
-      {'method':'v4_th', 'batch_size': batch_size, 'dist':'l1', 'fixed_weights': None},
-      {'method':'v4_th', 'batch_size': batch_size, 'dist':'l1', 'fixed_weights': 1},
-      {'method':'v4_th', 'batch_size': batch_size, 'dist':'l2', 'fixed_weights': None},
-      {'method':'v4_th', 'batch_size': batch_size, 'dist':'l2', 'fixed_weights': 1},
-      {'method':'v4_th', 'batch_size': batch_size, 'dist':'cos', 'fixed_weights': None},
-      {'method':'v4_th', 'batch_size': batch_size, 'dist':'cos', 'fixed_weights': 1},
+
+  """
+   large dataset with large weight fix=1 will result in huge updates if lr >0.005
+   
+   lr must be dependent of the dataset size & weights (1 or normalize)
+   
+   full: l2, 64, 0.002, w=1 -> GOOD
   
-  #    {'method':'v5_tf', 'batch_size': batch_size, 'dist':'l1'},
-  #    {'method':'v5_tf', 'batch_size': batch_size, 'dist':'l2'},
-  #    {'method':'v5_tf', 'batch_size': batch_size, 'dist':'cos', 'fixed_weights': None},
-  #    {'method':'v5_tf', 'batch_size': batch_size, 'dist':'cos', 'fixed_weights': 1.0},
+  """    
+  dct_options = {
+#      "universal_l2" : {
+#          'method' : 'v4_th', 
+#          'batch_size'   : 64, 
+#          'lr'           : 0.002, 
+#          'dist'         :'l2', 
+#          'fixed_weights': 1,
+#          'epochs'       : 1,
+#          'skip_negative': False,
+#          },
+
+
+#      "universal_l1" : {
+#          'method' : 'v4_th', 
+#          'batch_size'   : 64, 
+#          'lr'           : 0.002, 
+#          'dist'         :'l1', 
+#          'fixed_weights': 1,
+#          'epochs'       : 1,
+#          'skip_negative': False,
+#          },
+
+
+#      "universal_cos" : {
+#          'method' : 'v4_th', 
+#          'batch_size'   : 256, 
+#          'lr'           : 0.04, 
+#          'dist'         :'cos', 
+#          'fixed_weights': 1,
+#          'epochs'       : 1,
+#          'skip_negative': False,
+#          },
+
+
+      "l2wx" : {
+          'method' : 'v4_th', 
+          'batch_size'   : 256, 
+          'lr'           : 0.01, 
+          'dist'         :'l2', 
+          'fixed_weights': None,
+          'epochs'       : 100,
+          'skip_negative': False,
+          },
+
+
+#
+#      "l1wx" : {
+#          'method' : 'v4_th', 
+#          'batch_size'   : 64, 
+#          'lr'           : 0.002, 
+#          'dist'         :'l1', 
+#          'fixed_weights': None,
+#          'epochs'       : 1,
+#          'skip_negative': False,
+#          },
+#
+    }
+
+      
+
+  d_sim = prod_eng.analize_item(
+      exp_id, 
+      positive_id=pos_id, 
+      negative_id=neg_id, 
+      embeds_name=embeds_name
+      )
+  d_res = OrderedDict({'METHOD': []})
+  for k in d_sim:
+    d_res[k] = []
+  def add_result(name, _d):
+    d_res['METHOD'].append(name)
+    for k in _d:
+      d_res[k].append(_d[k])
+  add_result('direct', d_sim)
   
-      ]
-  
-  for itr_no, setting in enumerate(options):
+  for itr_no, setting_name in enumerate(dct_options):
+    setting = dct_options[setting_name]
     log.P("================================================================================================")
     log.P("================================================================================================")
-    log.P("== Iteration {}: ================================================================================".format(
-        itr_no + 1))
+    log.P("== Iteration {}: ".format(
+        itr_no + 1, setting_name))
     log.P("================================================================================================")
     log.P("{}".format(setting))
     log.P("================================================================================================")
     new_embeds = prod_eng.get_retrofitted_embeds(
         item_ids=exp_id, 
-        lr=0.001,
-  #      dct_negative={exp_id:[neg_id]},
-        skip_negative=False,
+#        dct_negative={exp_id:[neg_id]},
         DEBUG=DEBUG,
         eager=eager,
-        epochs=20,
-        verbose=False,
+#        verbose=False,
         **setting,
         )
     
     n_dif = (np.abs(new_embeds - embeds).sum(axis=1) > 1e-3).sum()
     log.P("Total {} embeddings modified".format(n_dif))
     
-    prod_eng.analize_item(exp_id, positive_id=pos_id, negative_id=neg_id, 
-                          embeds_name=embeds_name)
-    prod_eng.analize_item(exp_id, positive_id=pos_id, negative_id=neg_id, embeds=new_embeds,
-                          embeds_name=embeds_name+'_RETRO')   
+    d_sim = prod_eng.analize_item(
+        exp_id, 
+        positive_id=pos_id, 
+        negative_id=neg_id, 
+        embeds=new_embeds,
+        embeds_name=embeds_name+'_RETRO',
+        verbose=True,
+        )   
+    add_result(setting_name, d_sim)
     d = prod_eng.get_similar_items(exp_id, embeds=new_embeds, filtered=False, show=print_df,
                                name='Non-filtered neighbors of {} using RETROFITTED {} model'.format(
                                    exp_id, embeds_name))    
-    log.save_dataframe(d, 'neighbors', to_data=False)
+    #log.save_dataframe(d, 'neighbors', to_data=False)
+  log.P("Results:\n{}".format(
+      pd.DataFrame(d_res).sort_values(['CATEG', 'POS_R'], ascending=[True, False])))
 else:
     
   k = 3
   _ = prod_eng.get_item_replacement(
-      prod_id=exp_id,
+      item_id=exp_id,
       k=k,
       as_dataframe=True,
       verbose=True
@@ -335,7 +410,7 @@ else:
   
   k = 5
   _ = prod_eng.get_item_replacement(
-      prod_id=exp_id,
+      item_id=exp_id,
       k=k,
       as_dataframe=True,
       verbose=True

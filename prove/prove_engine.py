@@ -322,48 +322,76 @@ class EmbedsEngine(LummetryObject):
                    embeds=None,
                    show_df=False,
                    embeds_name=None,
+                   verbose=False,
+                   k=10,
                    ):
     self.log.start_timer('analize_item')
-    if embeds is None:
-      embeds = self.embeds      
-    self.log.Pr("Performing analysis of item {}...".format(item_id))
+
     self.log.start_timer('analize_item_info')
     d_i = self.get_item_info(item_id)
     self.log.stop_timer('analize_item_info')
+
     self.log.start_timer('analize_item_neibs')
+    if embeds is None:
+      embeds = self.embeds      
     idxs, dists = prove_utils.neighbors_by_idx(item_id, embeds, k=None)
     self.log.stop_timer('analize_item_neibs')
+
     self.log.start_timer('analize_item_dists')
     p_rank = np.where(idxs==positive_id)[0][0]
     n_rank = np.where(idxs==negative_id)[0][0]
     p_dist = dists[p_rank]
     n_dist = dists[n_rank]
     self.log.stop_timer('analize_item_dists')
+    
+    self.log.start_timer('analize_item_categ')
+    all_good = True
+    for categ_field in self.categ_fields:
+      categ = self.dct_prods_categs[item_id][categ_field]
+      neigh_categs = np.array([self.dct_prods_categs[x][categ_field] for x in idxs[:k]])
+      if (neigh_categs != categ).sum() > 0:
+        all_good = False
+    self.log.stop_timer('analize_item_categ')
+
+    self.log.start_timer('analize_item_df_similar')
     if show_df:
-      self.log.start_timer('analize_item_similar')
       df_f = self.get_similar_items(item_id, embeds, filtered=True)
       df_n = self.get_similar_items(item_id, embeds, filtered=False)
-      self.log.stop_timer('analize_item_similar')
-    self.P("Analysis of {}: '{}'  {}".format(
-        item_id, d_i['NAME'],
-        "using model {}".format(embeds_name) if embeds_name else '')
-        )
-    self.P("  Rank/dist from positive {:<7} {:>5}/{:.3f}".format(
-        str(positive_id)+':', 
-        p_rank, p_dist))
-    self.P("  Rank/dist from negative {:<7} {:>5}/{:.3f}".format(
-        str(negative_id)+':', 
-        n_rank, n_dist))
-    if show_df:
       self.P("  Non-filtered neighbors:")
       self.P(textwrap.indent(str(df_n), "    "))
       self.P("  Filtered neighbors:")
       self.P(textwrap.indent(str(df_f), "    "))
+    self.log.stop_timer('analize_item_df_similar')
+
+    self.log.start_timer('analize_item_print')      
+    if verbose:
+      self.P("Analysis of {}: '{}' {}".format(
+          item_id, d_i['NAME'],
+          "using model {}".format(embeds_name) if embeds_name else '')
+          )
+      self.P("  All top {} neighbors {}in same categories".format(
+          k, 'NOT ' if not all_good else ''))
+      self.P("  Rank/dist from positive {:<7} {:>5}/{:.3f}".format(
+          str(positive_id)+':', 
+          p_rank, p_dist))
+      self.P("  Rank/dist from negative {:<7} {:>5}/{:.3f}".format(
+          str(negative_id)+':', 
+          n_rank, n_dist))
+    self.log.stop_timer('analize_item_print')      
+
     self.log.stop_timer('analize_item')
-    return
+    d_res = OrderedDict({
+        'POS_D' : p_dist,
+        'POS_R' : p_rank,
+        'NEG_R' : n_rank,
+        'NEG_D' : n_dist,
+        'CATEG' : all_good,
+        })
+    return d_res
     
 
-  def get_similar_items(self, item_id, 
+  def get_similar_items(self, 
+                        item_id, 
                         embeds=None, 
                         filtered=False, 
                         k=10, 
@@ -481,21 +509,26 @@ class EmbedsEngine(LummetryObject):
         embeds=self.embeds, 
         k=10)
     cands = idxs[1:k+1]
-    all_ok = True
+    cands_dists = dists[:1:k+1]
+    all_ok = True    
     for cand in cands:
       for categ_type in self.categ_fields:
         if self.dct_prods_categs[item_id][categ_type] != self.dct_prods_categs[cand][categ_type]:
           all_ok = False
     if not all_ok:
+      self.P("Top k={} items do NOT match same categories as {}. Performing retrofit...".format(k, item_id))
       new_embeds = self.default_retrofit(item_ids=item_id)
       idxs, dists = prove_utils.neighbors_by_idx(
           idx=item_id, 
           embeds=new_embeds, 
           k=10)
       cands = idxs[1:k+1]
+      cands_dists = dists[:1:k+1]
+    else:
+      self.P("Top k={} items match same categories as {}".format(k, item_id))
     # end need retrofit
     if as_dataframe:
-      res = self._items_to_df(cands)
+      res = self._items_to_df(cands, dists=cands_dists)
     else:
       res = cands
     if verbose:
@@ -519,8 +552,11 @@ class EmbedsEngine(LummetryObject):
         item_ids=item_ids,
         method='v4_th',
         dist='l1',
+        lr=0.001,
+        epochs=20,
         skip_negative=False,
         batch_size=256,
+        fixed_weights=1,
         verbose=False,
         )
 
@@ -583,6 +619,7 @@ class EmbedsEngine(LummetryObject):
     self.P("Starting `{}()` retrofit function".format(func.__name__))
     t1 = time()
     embeds = func(dct_edges=_dct, dct_negative=_dct_neg, **kwargs)
+    self._clear_th()
     t2 = time()
     self.P("Retrofit with '{}' took {:.1f}s\t\t\t\t\t\t\t".format(func.__name__, t2-t1))
     return embeds
@@ -806,7 +843,7 @@ class EmbedsEngine(LummetryObject):
                                     epochs=99, 
                                     batch_size=256,
                                     gpu_optim=True,
-                                    lr=0.05,
+                                    lr=0.001,
                                     patience=2,
                                     tol=1e-3,
                                     dist='l1',
@@ -1092,7 +1129,7 @@ class EmbedsEngine(LummetryObject):
                                     epochs=99, 
                                     batch_size=256,
                                     gpu_optim=True,
-                                    lr=0.05,
+                                    lr=0.001,
                                     tol=1e-3,
                                     patience=2,
                                     DEBUG=False,
@@ -1157,7 +1194,7 @@ class EmbedsEngine(LummetryObject):
     else:
       negative_margin = 0
     self.P("  Training th ep={}, pos_batch={}, lr={:.1e}, tol={:.1e}, dist={}, fix_w={}, neg_m={}".format(
-        epochs, tuple(tensors[1].shape), lr, tol, 
+        epochs, (batch_size, tensors[1].shape[1]), lr, tol, 
         dist, fixed_weights,
         negative_margin))
     t_start = time()
@@ -1271,9 +1308,16 @@ class EmbedsEngine(LummetryObject):
     else:
       self.P("  Training done in {} epochs - {:.1f}s\t\t\t\t\t\t\t".format(
           epoch, train_time))
-    if th.cuda.is_available():
-      th.cuda.empty_cache()    
     return best_embeds
+  
+  def _clear_th(self):
+    try:
+      import torch as th
+      if th.cuda.is_available():
+        th.cuda.empty_cache()    
+    except:
+      pass
+    return
         
     
   
