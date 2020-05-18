@@ -1,0 +1,59 @@
+Training model for 99 epochs, batch=256, lr=5.0e-02, tol=1.0e-03, neg margin: 128, dist=l1, fixed_weights=None
+  Distance from positive 11418:  0.148
+  Distance from negative 9745:   0.748
+        ID  DIST                            NAME      H1                H2
+  0  12071 0.000  CD / DAVID BOWIE / BLACKSTAR (  MUZICA  CD International
+  1   6275 0.112  CD / LANA DEL REY / LUST FOR L  MUZICA  CD International
+  2   1175 0.121  CD / QUEEN / GREATEST HITS (20  MUZICA  CD International
+  3   1408 0.122  CD / QUEEN / THE PLATINUM COLL  MUZICA  CD International
+  4  12238 0.128  CD / RED HOT CHILI PEPPERS / T  MUZICA  CD International
+  5   9991 0.131  CD / LED ZEPPELIN / REMASTERS   MUZICA  CD International
+  6   4416 0.135  CD / COLDPLAY / 4 CD CATALOGUE  MUZICA  CD International
+  7  12888 0.136  CD / EURYTHMICS / GREATEST HIT  MUZICA  CD International
+  8   1032 0.139  CD / QUEEN / BOHEMIAN RHAPSODY  MUZICA  CD International
+  9   2490 0.142  CD / BILLIE EILISH / WHEN WE A  MUZICA  CD International
+
+Training model for 99 epochs, batch=256, lr=5.0e-02, tol=1.0e-03, negative margin: 128, dist=l2, fixed_weights=None
+  Distance from positive 11418:  0.043
+  Distance from negative 9745:   0.743
+        ID  DIST                            NAME      H1                H2
+  0  12071 0.000  CD / DAVID BOWIE / BLACKSTAR (  MUZICA  CD International
+  1  12238 0.019  CD / RED HOT CHILI PEPPERS / T  MUZICA  CD International
+  2   4416 0.020  CD / COLDPLAY / 4 CD CATALOGUE  MUZICA  CD International
+  3   7004 0.020  CD / PINK MARTINI / JE DIS OUI  MUZICA  CD International
+  4  11625 0.021  CD / V/A / ULTIMATE ROCK (2015  MUZICA  CD International
+  5  12225 0.021  CD / FRANK SINATRA / NOTHING B  MUZICA  CD International
+  6   1408 0.022  CD / QUEEN / THE PLATINUM COLL  MUZICA  CD International
+  7  11718 0.022  CD / SIA / THIS IS ACTING (Del  MUZICA  CD International
+  8   8366 0.023  CD / ANGELA GHEORGHIU / ETERNA  MUZICA  CD International
+  9  12707 0.024  CD / INXS / THE VERY BEST (201  MUZICA  CD International
+
+Training model for 99 epochs, batch=256, lr=5.0e-02, tol=1.0e-03, negative margin: 1, dist=cos, fixed_weights=None
+  Distance from positive 11418:  0.639
+  Distance from negative 9745:   0.701
+        ID  DIST                            NAME               H1                    H2
+  0  12071 0.000  CD / DAVID BOWIE / BLACKSTAR (           MUZICA      CD International
+  1   4416 0.624  CD / COLDPLAY / 4 CD CATALOGUE           MUZICA      CD International
+  2  11418 0.639  CD / DAVID BOWIE / BEST OF BOW           MUZICA      CD International
+  3   4865 0.660  CD / COLDPLAY / A HEAD FULL OF           MUZICA      CD International
+  4   8403 0.685  1001 DE CARTI DE CITIT INTR-O         CARTE ROM  POEZIE / TEATRU / ST
+  5   7933 0.692     CUVINTE INCRUCISATE/ IQ FUN        CARTE ROM    CARTI PENTRU COPII
+  6   4263 0.693  COUNTRY MERRY CHRISTMAS / 3 M      PAPETARIE AA              Giftware
+  7   9745 0.701  MASINI DIE-CAST 7.5cm III ASST          JUCARII               JUCARII
+  8   4400 0.702  CARTEA SARUTURILOR / IV CEL NA        CARTE ROM  POEZIE / TEATRU / ST
+  9   8392 0.703                13.2X2.5CM PLATE  ACCESORII GASTR  Accesorii servit mas
+
+Training model for 99 epochs, batch=256, lr=5.0e-02, tol=1.0e-03, negative margin: 1, dist=cos, fixed_weights=1
+  Distance from positive 11418:  0.019
+  Distance from negative 9745:   0.791
+        ID  DIST                            NAME      H1                H2
+  0  12071 0.000  CD / DAVID BOWIE / BLACKSTAR (  MUZICA  CD International
+  1  10967 0.000  CD / JULIO IGLESIAS / THE ESSE  MUZICA  CD International
+  2   6275 0.000  CD / LANA DEL REY / LUST FOR L  MUZICA  CD International
+  3  10780 0.000  CD / TWENTY ONE PILOTS / TRENC  MUZICA  CD International
+  4  12238 0.000  CD / RED HOT CHILI PEPPERS / T  MUZICA  CD International
+  5  12225 0.000  CD / FRANK SINATRA / NOTHING B  MUZICA  CD International
+  6   8366 0.000  CD / ANGELA GHEORGHIU / ETERNA  MUZICA  CD International
+  7  10749 0.000  CD / PANTERA / VULGAR DISPLAY   MUZICA  CD International
+  8  11703 0.000  CD / LEONARD COHEN / MORE BEST  MUZICA  CD International
+  9  11343 0.000  CD / BOB DYLAN / THE ESSENTIAL  MUZICA  CD International

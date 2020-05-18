@@ -1,2 +1,18 @@
 
 .spyproject/
+
+*.csv
+
+*.npz
+
+exp_data/obfuscated_keys.txt
+
+*.pkl
+
+*.npy
+
+prove/__pycache__/
+
+experiment/_data/obfuscated_keys.txt
+
+experiment/_logs/
